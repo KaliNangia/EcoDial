@@ -1,5 +1,7 @@
 # 🌱 EcoDial — Interactive Carbon Footprint Console
 
+**Live Web Application**: [https://ecodial-484628711205.us-central1.run.app](https://ecodial-484628711205.us-central1.run.app)
+
 A vibe-coded solution for the problem statement: Design a solution that helps individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
 
 ---

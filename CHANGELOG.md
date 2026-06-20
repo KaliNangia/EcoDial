@@ -23,6 +23,6 @@ All notable changes to the EcoDial Carbon Footprint Awareness Console are docume
 
 ### Added
 - Initial standalone offline prototype of the EcoDial console.
-- Interactive SVG tactile dial control, clicky sound effects, custom color sliders.
+- Interactive SVG dial control, clicky sound effects, custom color sliders.
 - Real-time carbon math, comparison bars, visual breakdown charts, and shareable carbon passport cards using canvas-rendered downloads.
 - Local Storage history snapshot log and mock community board layout.
