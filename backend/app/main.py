@@ -4,6 +4,7 @@ import os
 import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from .schemas import FootprintInputs, LeaderboardMember
 from .calculator import calculate_footprint
 
@@ -113,3 +114,9 @@ def delete_member(member_id: str):
         
     save_db(new_db)
     return new_db
+
+# Serve static files from the sibling 'static' directory if it exists
+static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+

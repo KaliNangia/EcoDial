@@ -4,7 +4,9 @@
 // 1. Core State, API Base URL and Constants
 // ==========================================
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? (window.location.port === "8080" ? "http://localhost:8000" : "")
+  : "";
 
 const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
