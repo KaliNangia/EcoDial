@@ -284,6 +284,17 @@ function renderCategoricalOptions(spec, currentValue) {
   });
 }
 
+function updateCalculations() {
+  if (isDragging) {
+    // Compute locally during active drags for zero latency and minimal network overhead
+    const result = runCalculation(userInputs);
+    renderCalculationResult(result);
+  } else {
+    // Sync with the backend API for secure data verification
+    calculateAndRender();
+  }
+}
+
 function handleDialInteraction(e) {
   const dialRect = dialInteractive.getBoundingClientRect();
   const cx = dialRect.left + dialRect.width / 2;
@@ -321,7 +332,7 @@ function handleDialInteraction(e) {
     userInputs[activeParamId] = newValue;
     playClickSound();
     updateDialVisuals();
-    calculateAndRender();
+    updateCalculations();
   }
 }
 
@@ -341,7 +352,10 @@ function initDialDrag() {
   };
   
   const stopDrag = () => {
-    isDragging = false;
+    if (isDragging) {
+      isDragging = false;
+      calculateAndRender();
+    }
   };
   
   dialInteractive.addEventListener("mousedown", startDrag);
@@ -375,7 +389,7 @@ function adjustParam(direction) {
     }
   }
   updateDialVisuals();
-  calculateAndRender();
+  updateCalculations();
 }
 
 dialInteractive.addEventListener("keydown", (e) => {
