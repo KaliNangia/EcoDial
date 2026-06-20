@@ -6,20 +6,20 @@ Developed specifically to help Indian households and users **track and reduce** 
 
 ---
 
-## 🏆 Hackathon Submission Details
+## 📝 Project Details & Credits
 
 ### 👥 Team & Credits
 * **Project Concept & Ideation**: Conceptualized by a **first-year B.Tech Student at the Indian Institute of Technology (IIT), Ropar** (using this project to learn full-stack Python/FastAPI architectures).
 * **Engineering & Code Implementation**: Built, coded, and implemented entirely by **Gemini** (Advanced Agentic AI platform from Google DeepMind), serving as the developer translating the project concept into software code.
 
-### 🌟 Why EcoDial is a Winning Entry
-To win a hackathon, an entry must demonstrate not just a beautiful idea, but stellar engineering, security, and production readiness. EcoDial excels across all columns:
-1. **Decoupled Modern Architecture**: Transitioned from a simple static webpage into a professional **FastAPI backend API + static Nginx frontend client** stack.
-2. **Production-Ready Orchestration**: Powered by **Docker & Docker Compose**. Judges can launch the entire system using a single command without worrying about package installs or environment setups.
-3. **Ironclad Server-Side Security**: Features server-side math calculations and strict boundary checks via **Pydantic Schemas** (`schemas.py`). This prevents client-side script tampering or score manipulation on the leaderboard.
-4. **Offline Resilience (Graceful Fallback)**: The frontend SPA features a robust fallback handler. If the backend FastAPI server goes offline, calculations and community scores instantly downgrade to client-side math equations and localStorage, ensuring zero app crashes.
-5. **Premium Interactive UX**: Built with custom SVG dial trackers, Web Audio click synthesis for tactile feedback, CSS glassmorphic animations, and custom canvas-based card image generators.
-6. **Demographic Tailoring**: Designed for Indian users, replacing out-of-context global treaty labels with direct target trackers.
+### ⚙️ Technical Implementation
+This project uses the following technical structure to run the application:
+1. **Decoupled Architecture**: Separates the **FastAPI backend API** from the **static Nginx frontend client** stack.
+2. **Containerized Orchestration**: Managed via **Docker & Docker Compose** to run both services together.
+3. **Server-Side Calculations**: Uses **Pydantic Schemas** (`schemas.py`) on the backend to validate input values securely.
+4. **Offline Fallback Handler**: Standardizes a fallback in the frontend JavaScript client so that if the backend API server is offline, the app falls back to client-side math equations and local storage storage.
+5. **Interactive UI Elements**: Incorporates custom SVG dial trackers, Web Audio click synthesis for tactile feedback, CSS animations, and a canvas-based card exporter.
+6. **Regional Alignment**: Configured specifically to track and compare emissions using localized benchmarks.
 
 ---
 
