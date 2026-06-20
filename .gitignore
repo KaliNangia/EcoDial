@@ -1,0 +1,25 @@
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+backend/app/database.json
+
+# Local system configuration
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Static files server log
+*.log
+npm-debug.log*
+
+# Docker compose overrides/secrets
+.env
+.env.*
+!.env.example

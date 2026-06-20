@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: ecodial-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/backend/app
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+
+  frontend:
+    build: ./frontend
+    container_name: ecodial-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A premium, interactive carbon footprint calculator with drag-controlled tactile dials, live calculations, comparisons, and community leaderboards.">
+  <title>EcoDial — Interactive Carbon Footprint Console</title>
+  
+  <!-- Font and Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Skip-to-content link for accessibility -->
+  <a href="#main-dashboard" class="skip-link">Skip to main content</a>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"></path>
+          <path d="M12 6a6 6 0 0 1 6 6c0 3.314-2.686 6-6 6s-6-2.686-6-6a6 6 0 0 1 6-6z"></path>
+          <path d="M12 2v4"></path>
+          <path d="M12 18v4"></path>
+          <path d="M4.93 4.93l2.83 2.83"></path>
+          <path d="M16.24 16.24l2.83 2.83"></path>
+          <path d="M2 12h4"></path>
+          <path d="M18 12h4"></path>
+          <path d="M4.93 19.07l2.83-2.83"></path>
+          <path d="M16.24 7.76l2.83-2.83"></path>
+        </svg>
+        <h1>EcoDial</h1>
+      </div>
+      <p>Premium Tactile Carbon Footprint Tracker</p>
+    </div>
+  </header>
+
+  <main id="main-dashboard" class="dashboard">
+    <!-- Left Column: The Console Control Panel -->
+    <section class="console-panel card" aria-labelledby="console-heading">
+      <h2 id="console-heading">Dial Controller</h2>
+      <p class="console-sub">Drag the dial knob or use controls to adjust the active input value.</p>
+      
+      <!-- Main Dial Widget -->
+      <div class="dial-wrapper">
+        <div class="dial-container" id="dial-interactive" role="slider" aria-label="Control Dial" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <!-- Background Notch Circle -->
+          <svg class="dial-svg" viewBox="0 0 200 200">
+            <defs>
+              <linearGradient id="gradient-track" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="50%" stop-color="#eab308" />
+                <stop offset="100%" stop-color="#ef4444" />
+              </linearGradient>
+            </defs>
+            
+            <!-- Outer ticks track -->
+            <circle class="dial-track-bg" cx="100" cy="100" r="85" />
+            <!-- Active Fill Arc -->
+            <circle class="dial-track-fill" id="dial-progress-arc" cx="100" cy="100" r="85" stroke="url(#gradient-track)" />
+          </svg>
+          
+          <!-- Outer Dial Ring (ticks render area) -->
+          <div class="dial-ticks" id="dial-ticks-container"></div>
+          
+          <!-- Rotating Knob -->
+          <div class="dial-knob" id="dial-knob-element">
+            <div class="dial-knob-pointer"></div>
+            <div class="dial-knob-cap"></div>
+          </div>
+          
+          <!-- Inner Info Display -->
+          <div class="dial-display">
+            <div class="dial-display-category" id="dial-category-label">Select a parameter</div>
+            <div class="dial-display-value" id="dial-value-label">--</div>
+            <div class="dial-display-unit" id="dial-unit-label">click card below</div>
+          </div>
+        </div>
+        <!-- Start/End visual labels for the dial -->
+        <div class="dial-range-labels">
+          <span id="dial-min-val-label" class="dial-range-lbl">0</span>
+          <span id="dial-max-val-label" class="dial-range-lbl">2,000</span>
+        </div>
+      </div>
+
+      <!-- Fine Tuning Accessibility Controls -->
+      <div class="dial-controls">
+        <button id="dial-btn-dec" class="btn btn-dial-adjust" aria-label="Decrease value">-</button>
+        <button id="dial-btn-inc" class="btn btn-dial-adjust" aria-label="Increase value">+</button>
+      </div>
+
+      <!-- Settings & Feedback -->
+      <div class="console-footer">
+        <!-- Sound Effect Toggle -->
+        <button id="toggle-sound-btn" class="btn-toggle-sound" aria-label="Toggle Dial Sound">
+          <svg class="sound-icon sound-on" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg class="sound-icon sound-off hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+          <span id="sound-status-text">Audio Click: ON</span>
+        </button>
+      </div>
+      
+      <!-- Option Selector for Categorical Inputs -->
+      <div id="categorical-options-container" class="categorical-options hidden">
+        <!-- Dynmically filled buttons -->
+      </div>
+    </section>
+
+    <!-- Right Column: Results & Inputs Layout -->
+    <div class="results-layout">
+      <!-- Live Footprint Summary Card -->
+      <section class="score-card card" aria-labelledby="score-heading">
+        <h2 id="score-heading" class="visually-hidden">Footprint Summary</h2>
+        <div class="score-container">
+          <div class="score-metric">
+            <span class="score-label">Annual Carbon Footprint</span>
+            <div class="score-number-wrapper">
+              <span id="score-value" class="score-number">0.00</span>
+              <span class="score-unit">tonnes CO<sub>2</sub>e</span>
+            </div>
+            <div id="impact-badge" class="badge">Calculating...</div>
+          </div>
+          
+          <div class="score-comparisons">
+            <div class="comparison-bar">
+              <div class="comp-label-row">
+                <span>Sustainable Target</span>
+                <span>2.0 t</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill sustainable-fill" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <div class="comparison-bar">
+              <div class="comp-label-row">
+                <span>Global Average</span>
+                <span>4.8 t</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill avg-fill" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <div class="comparison-bar">
+              <div class="comp-label-row">
+                <span>Your Estimated Level</span>
+                <span id="comparison-user-val">0.0 t</span>
+              </div>
+              <div class="bar-track">
+                <div id="user-footprint-fill" class="bar-fill user-fill" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Shareable Carbon Passport Card -->
+      <section class="ecocard-section card" aria-labelledby="ecocard-heading">
+        <h2 id="ecocard-heading">Shareable Carbon Passport</h2>
+        <p class="console-sub">Customize your cardholder name and download your passport to showcase your green status.</p>
+        
+        <div class="ecocard-container">
+          <div class="ecocard" id="ecocard-card-element">
+            <div class="ecocard-glow"></div>
+            <div class="ecocard-header">
+              <span class="ecocard-logo">🌱 ECODIAL</span>
+              <span class="ecocard-type">CARBON PASSPORT</span>
+            </div>
+            
+            <div class="ecocard-body">
+              <div class="ecocard-field">
+                <label for="card-holder-name" class="ecocard-label">CARD HOLDER</label>
+                <input type="text" id="card-holder-name" value="Green Champion" placeholder="Enter name" maxlength="18">
+              </div>
+              <div class="ecocard-row">
+                <div class="ecocard-field">
+                  <span class="ecocard-label">ANNUAL CO2e</span>
+                  <span class="ecocard-value" id="card-footprint-val">0.00 t</span>
+                </div>
+                <div class="ecocard-field">
+                  <span class="ecocard-label">STATUS</span>
+                  <span class="ecocard-status" id="card-status-val">Sustainable</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="ecocard-footer">
+              <span>Track & Reduce Carbon</span>
+              <span>2026 ISSUE</span>
+            </div>
+          </div>
+          
+          <button id="download-card-btn" class="btn btn-download-pass">📥 Download Passport Card Image</button>
+        </div>
+      </section>
+
+      <!-- Category Navigation & Cards Grid -->
+      <section class="inputs-panel card" aria-labelledby="inputs-heading">
+        <h2 id="inputs-heading" class="visually-hidden">Input Parameters</h2>
+        <div class="tabs-header">
+          <button class="tab-btn active" data-category="transport">🚗 Transport</button>
+          <button class="tab-btn" data-category="home">🏡 Home Energy</button>
+          <button class="tab-btn" data-category="lifestyle">🍽️ Lifestyle</button>
+        </div>
+
+        <div class="tabs-content">
+          <!-- Transport Tab Content -->
+          <div class="tab-pane active" id="tab-transport">
+            <div class="cards-grid">
+              <div class="param-card active" id="card-car_km_per_week" data-id="car_km_per_week">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13" rx="2" ry="2"></rect>
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Car Driving</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-car_km_per_week">0</span>
+                    <span class="card-unit">km/week</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-car_fuel" data-id="car_fuel">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 22h12M4 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"></path>
+                    <path d="M14 9h7a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-7"></path>
+                    <circle cx="9" cy="9" r="2"></circle>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Car Fuel Type</h3>
+                  <div class="card-val-row">
+                    <span class="card-val capitalize" id="val-car_fuel">petrol</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-public_transit_km_per_week" data-id="public_transit_km_per_week">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="6"></line>
+                    <line x1="6" y1="12" x2="18" y2="12"></line>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Public Transit</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-public_transit_km_per_week">0</span>
+                    <span class="card-unit">km/week</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-short_haul_flights_per_year" data-id="short_haul_flights_per_year">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <line x1="3.27" y1="6.96" x2="12" y2="12.01"></line>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    <line x1="20.73" y1="6.96" x2="12" y2="12"></line>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Short-haul Flights</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-short_haul_flights_per_year">0</span>
+                    <span class="card-unit">trips/year</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-long_haul_flights_per_year" data-id="long_haul_flights_per_year">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4.5 19.5 3S18 3 16.5 4.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.7c-.2.4-.1.9.3 1.1L9 11.5l-3 3-2.3-.5c-.4-.1-.8.1-1 .4l-.4.5c-.2.4-.1.8.3 1l3 1.5 1.5 3c.2.4.6.5 1 .3l.5-.4c.3-.2.5-.6.4-1l-.5-2.3 3-3 3.3 5.3c.2.4.7.5 1.1.3l.7-.3c.4-.2.6-.6.5-1.1z"></path>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Long-haul Flights</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-long_haul_flights_per_year">0</span>
+                    <span class="card-unit">trips/year</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Home Energy Tab Content -->
+          <div class="tab-pane" id="tab-home">
+            <div class="cards-grid">
+              <div class="param-card" id="card-electricity_kwh_per_month" data-id="electricity_kwh_per_month">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Electricity Use</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-electricity_kwh_per_month">0</span>
+                    <span class="card-unit">kWh/month</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-natural_gas_kwh_per_month" data-id="natural_gas_kwh_per_month">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2c1.88 0 3.39 1.19 4.02 2.82a5.093 5.093 0 0 0-4.02 1.34c-2 2-2 5.02 0 7.02s5.02 2 7.02 0a5.093 5.093 0 0 0 1.34-4.02C20.81 9.8 22 11.31 22 13.19C22 18.06 17.52 22 12 22S2 18.06 2 13.19C2 7.52 7.52 2 12 2z"></path>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Natural Gas Use</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-natural_gas_kwh_per_month">0</span>
+                    <span class="card-unit">kWh/month</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-household_size" data-id="household_size">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Household Size</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-household_size">1</span>
+                    <span class="card-unit">people</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lifestyle Tab Content -->
+          <div class="tab-pane" id="tab-lifestyle">
+            <div class="cards-grid">
+              <div class="param-card" id="card-diet" data-id="diet">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    <path d="M2 12h20"></path>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Primary Diet</h3>
+                  <div class="card-val-row">
+                    <span class="card-val capitalize" id="val-diet">medium_meat</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-goods_spend_usd_per_month" data-id="goods_spend_usd_per_month">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Goods Spending</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-goods_spend_usd_per_month">0</span>
+                    <span class="card-unit">USD/month</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-card" id="card-waste_kg_per_week" data-id="waste_kg_per_week">
+                <div class="card-icon-wrapper">
+                  <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </div>
+                <div class="card-info">
+                  <h3>Landfill Waste</h3>
+                  <div class="card-val-row">
+                    <span class="card-val" id="val-waste_kg_per_week">0</span>
+                    <span class="card-unit">kg/week</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category Visual Breakdown Chart -->
+      <section class="breakdown-card card" aria-labelledby="breakdown-heading">
+        <h2 id="breakdown-heading">Emissions Breakdown</h2>
+        <div class="breakdown-chart" id="breakdown-chart-bars">
+          <!-- Dynamic chart rows generated by JS -->
+          <div class="bar-row">
+            <span>🚗 Transport</span>
+            <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-transport" style="width: 0%"></div></div>
+            <span id="breakdown-val-transport">0.00 t</span>
+          </div>
+          <div class="bar-row">
+            <span>🏡 Home Energy</span>
+            <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-home" style="width: 0%"></div></div>
+            <span id="breakdown-val-home">0.00 t</span>
+          </div>
+          <div class="bar-row">
+            <span>🍽️ Diet</span>
+            <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-diet" style="width: 0%"></div></div>
+            <span id="breakdown-val-diet">0.00 t</span>
+          </div>
+          <div class="bar-row">
+            <span>🛍️ Consumption</span>
+            <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-consumption" style="width: 0%"></div></div>
+            <span id="breakdown-val-consumption">0.00 t</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recommendations Action List -->
+      <section class="actions-card card" aria-labelledby="actions-heading">
+        <h2 id="actions-heading">Tailored Reductions</h2>
+        <div class="insights-summary" id="insights-summary-text">
+          Adjust inputs to see quantified actions targeting your largest emission categories.
+        </div>
+        <ul class="plain-list" id="recommendations-list">
+          <!-- Dynamic list of recommendations -->
+        </ul>
+      </section>
+
+      <!-- History Snapshots Logs -->
+      <section class="history-card card" aria-labelledby="history-heading">
+        <h2 id="history-heading">Saved Snapshots</h2>
+        <div class="history-controls">
+          <button id="save-snapshot-btn" class="btn">💾 Save Snapshot</button>
+          <button id="reset-platform-btn" class="btn secondary">🔄 Reset Inputs</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="history" id="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Total Footprint</th>
+                <th>Transport</th>
+                <th>Home</th>
+                <th>Diet</th>
+                <th>Consumption</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <tr>
+                <td colspan="7" class="empty-history">No snapshots saved yet. Save current estimates using the button above.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Community Status Light Board & Competition Leaderboard -->
+      <section class="community-card card" aria-labelledby="community-heading">
+        <h2 id="community-heading">Community Status &amp; Leaderboard</h2>
+        <p class="console-sub">Fostering friendly competition to reduce emissions. Monitor active member status at a glance!</p>
+        
+        <!-- Add Friend Form -->
+        <div class="community-adder">
+          <div class="field">
+            <label for="friend-name-input">Friend Name</label>
+            <input type="text" id="friend-name-input" placeholder="e.g. Alice" maxlength="12">
+          </div>
+          <div class="field">
+            <label for="friend-score-input">Carbon footprint (tonnes)</label>
+            <input type="number" id="friend-score-input" placeholder="e.g. 3.2" step="0.1" min="0" max="30">
+          </div>
+          <button id="add-friend-btn" class="btn" style="margin-top: 1.5rem;">👤 Add Member</button>
+        </div>
+
+        <!-- Warning Lights Board -->
+        <h3 class="board-title">🚨 System Status Lights</h3>
+        <div class="status-light-board" id="status-lights-grid">
+          <!-- Dynamically populated with status LEDs -->
+        </div>
+
+        <!-- Leaderboard Table -->
+        <h3 class="board-title" style="margin-top: 2rem;">🏆 Eco Competition Board</h3>
+        <div class="table-wrapper">
+          <table class="history" id="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Member Name</th>
+                <th>Footprint Score</th>
+                <th>Carbon Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-table-body">
+              <!-- Dynamically populated with ranked users -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p>© 2026 EcoDial Platform. Engineered for local, low-latency, carbon-conscious lifecycle evaluations.</p>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
