@@ -226,8 +226,7 @@ function updateDialVisuals() {
     const idx = spec.options.indexOf(value);
     ratio = idx / (spec.options.length - 1);
     
-    categoricalOptionsContainer.classList.remove("hidden");
-    renderCategoricalOptions(spec, value);
+    categoricalOptionsContainer.classList.add("hidden");
     dialValueLabel.style.fontSize = "1.2rem";
     dialValueLabel.textContent = value.replace("_", " ");
     dialUnitLabel.textContent = "option";
@@ -529,6 +528,24 @@ function generateInsights(inputs, breakdown, totalKg) {
   };
 }
 
+function getStatusData(totalKg) {
+  let statusText = "High Emitted";
+  let statusEmoji = "(>_<)";
+  let badgeClass = "badge badge-warning";
+  
+  if (totalKg <= SUSTAINABLE_TARGET_ANNUAL_KG) {
+    statusText = "Sustainable";
+    statusEmoji = "(^_^)";
+    badgeClass = "badge badge-sustainable";
+  } else if (totalKg <= GLOBAL_AVG_ANNUAL_KG) {
+    statusText = "Moderate";
+    statusEmoji = "(-_-)";
+    badgeClass = "badge badge-moderate";
+  }
+  
+  return { statusText, statusEmoji, badgeClass };
+}
+
 // ==========================================
 // 5. REST API Client Integrations & Rendering
 // ==========================================
@@ -563,23 +580,8 @@ function renderCalculationResult(result) {
   // Update passport display values in real time
   cardFootprintVal.textContent = `${totalTonnes.toFixed(2)} t`;
   
-  // Set footprint badges
-  let statusText = "High Emitted";
-  let badgeClass = "badge badge-warning";
-  let statusColorClass = "badge-warning";
-  let statusEmoji = "(>_<)";
-  
-  if (result.total <= SUSTAINABLE_TARGET_ANNUAL_KG) {
-    statusText = "Sustainable";
-    badgeClass = "badge badge-sustainable";
-    statusColorClass = "badge-sustainable";
-    statusEmoji = "(^_^)";
-  } else if (result.total <= GLOBAL_AVG_ANNUAL_KG) {
-    statusText = "Moderate";
-    badgeClass = "badge badge-moderate";
-    statusColorClass = "badge-moderate";
-    statusEmoji = "(-_-)";
-  }
+  // Set footprint badges using shared helper function
+  const { statusText, statusEmoji, badgeClass } = getStatusData(result.total);
   
   impactBadge.textContent = statusText === "Sustainable" ? "Sustainable 🌱" : `${statusText} Impact ⚡`;
   impactBadge.className = badgeClass;
@@ -651,16 +653,9 @@ function downloadEcoCardImage() {
   const result = runCalculation(userInputs);
   const scoreText = `${(result.total / 1000).toFixed(2)} tonnes`;
   
-  let statusLabel = "High Emitted";
-  let statusEmoji = "(>_<)";
-  
-  if (result.total <= SUSTAINABLE_TARGET_ANNUAL_KG) {
-    statusLabel = "Sustainable";
-    statusEmoji = "(^_^)";
-  } else if (result.total <= GLOBAL_AVG_ANNUAL_KG) {
-    statusLabel = "Moderate";
-    statusEmoji = "(-_-)";
-  }
+  // Determine status metadata using the shared helper function
+  const { statusText, statusEmoji } = getStatusData(result.total);
+  const statusLabel = statusText;
 
   // High resolution canvas matching card graphics at 2x scale (760x440)
   const canvas = document.createElement("canvas");
@@ -812,6 +807,19 @@ cardHolderNameInput.addEventListener("input", () => {
 // 6. Navigation Tabs & Cards Grid Logic
 // ==========================================
 
+function cycleCategoricalValue(paramId) {
+  const spec = PARAM_SPECS[paramId];
+  if (!spec || !spec.isCategoric) return;
+  
+  const currentValue = userInputs[paramId];
+  const currentIdx = spec.options.indexOf(currentValue);
+  const nextIdx = (currentIdx + 1) % spec.options.length;
+  const nextValue = spec.options[nextIdx];
+  
+  userInputs[paramId] = nextValue;
+  playClickSound();
+}
+
 function initNavigation() {
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -824,18 +832,31 @@ function initNavigation() {
       
       const firstCard = document.querySelector(`#tab-${targetCategory} .param-card`);
       if (firstCard) {
-        firstCard.click();
+        // Just activate it on tab change without cycling
+        const firstCardId = firstCard.getAttribute("data-id");
+        paramCards.forEach((c) => c.classList.remove("active"));
+        firstCard.classList.add("active");
+        activeParamId = firstCardId;
+        updateDialVisuals();
       }
     });
   });
   
   paramCards.forEach((card) => {
     card.addEventListener("click", () => {
+      const clickedParamId = card.getAttribute("data-id");
+      const spec = PARAM_SPECS[clickedParamId];
+      
       paramCards.forEach((c) => c.classList.remove("active"));
       card.classList.add("active");
+      activeParamId = clickedParamId;
       
-      activeParamId = card.getAttribute("data-id");
-      playClickSound();
+      if (spec && spec.isCategoric) {
+        cycleCategoricalValue(clickedParamId);
+        calculateAndRender();
+      } else {
+        playClickSound();
+      }
       updateDialVisuals();
     });
   });
