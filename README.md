@@ -1,6 +1,6 @@
 # 🌱 EcoDial — Interactive Carbon Footprint Console
 
-A vibe-coded solution designed to help individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
+A vibe-coded solution for the problem statement: Design a solution that helps individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
 
 ---
 
