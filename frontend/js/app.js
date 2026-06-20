@@ -134,7 +134,6 @@ const soundStatusText = document.getElementById("sound-status-text");
 const soundIconOn = toggleSoundBtn.querySelector(".sound-on");
 const soundIconOff = toggleSoundBtn.querySelector(".sound-off");
 
-const categoricalOptionsContainer = document.getElementById("categorical-options-container");
 
 const scoreValue = document.getElementById("score-value");
 const impactBadge = document.getElementById("impact-badge");
@@ -226,7 +225,6 @@ function updateDialVisuals() {
     const idx = spec.options.indexOf(value);
     ratio = idx / (spec.options.length - 1);
     
-    categoricalOptionsContainer.classList.add("hidden");
     dialValueLabel.style.fontSize = "1.2rem";
     dialValueLabel.textContent = value.replace("_", " ");
     dialUnitLabel.textContent = "option";
@@ -236,7 +234,6 @@ function updateDialVisuals() {
     dialMaxValLabel.textContent = spec.options[spec.options.length - 1].replace("_", " ");
   } else {
     ratio = (value - spec.min) / (spec.max - spec.min);
-    categoricalOptionsContainer.classList.add("hidden");
     dialValueLabel.style.fontSize = "1.5rem";
     dialValueLabel.textContent = value.toLocaleString();
     dialUnitLabel.textContent = spec.unit;
@@ -266,23 +263,7 @@ function updateDialVisuals() {
   dialInteractive.setAttribute("aria-valuetext", String(value).replace("_", " "));
 }
 
-function renderCategoricalOptions(spec, currentValue) {
-  categoricalOptionsContainer.innerHTML = "";
-  spec.options.forEach((opt) => {
-    const btn = document.createElement("button");
-    btn.className = `categorical-btn ${opt === currentValue ? "active" : ""}`;
-    btn.innerHTML = `<span>${opt.replace("_", " ")}</span>`;
-    btn.addEventListener("click", () => {
-      if (userInputs[activeParamId] !== opt) {
-        userInputs[activeParamId] = opt;
-        playClickSound();
-        updateDialVisuals();
-        calculateAndRender();
-      }
-    });
-    categoricalOptionsContainer.appendChild(btn);
-  });
-}
+
 
 function updateCalculations() {
   if (isDragging) {

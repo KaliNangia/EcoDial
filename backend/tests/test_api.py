@@ -1,4 +1,10 @@
+"""
+Integration tests for the Ecodial FastAPI router endpoints.
+Tests calculations, validation behaviors, leaderboard persistence, and safety restrictions.
+"""
+
 import os
+from typing import Dict, Any, Generator
 import pytest
 from fastapi.testclient import TestClient
 
@@ -9,9 +15,13 @@ from app.main import app
 
 client = TestClient(app)
 
+
 @pytest.fixture(autouse=True)
-def run_around_tests():
-    # Cleanup mock database if exists
+def run_around_tests() -> Generator[None, None, None]:
+    """
+    Setup and cleanup fixture for database mock files.
+    Deletes the mock JSON database file before and after every test function execution.
+    """
     if os.path.exists("test_database.json"):
         try:
             os.remove("test_database.json")
@@ -24,8 +34,12 @@ def run_around_tests():
         except OSError:
             pass
 
-def test_api_calculate_success():
-    payload = {
+
+def test_api_calculate_success() -> None:
+    """
+    Verify POST /api/calculate returns 200 OK and correct calculations for a valid payload.
+    """
+    payload: Dict[str, Any] = {
         "car_km_per_week": 100,
         "car_fuel": "hybrid",
         "public_transit_km_per_week": 50,
@@ -40,31 +54,41 @@ def test_api_calculate_success():
     }
     response = client.post("/api/calculate", json=payload)
     assert response.status_code == 200
-    data = response.json()
+    data: Dict[str, Any] = response.json()
     assert "total" in data
     assert "breakdown" in data
     assert data["total"] > 0
 
-def test_api_calculate_validation_failure():
-    # Negative car km is invalid
-    payload = {
+
+def test_api_calculate_validation_failure() -> None:
+    """
+    Verify POST /api/calculate yields 422 validation failure if inputs exceed bounds (e.g. negative values).
+    """
+    payload: Dict[str, Any] = {
         "car_km_per_week": -10,
         "car_fuel": "hybrid"
     }
     response = client.post("/api/calculate", json=payload)
     assert response.status_code == 422
 
-def test_api_leaderboard_get():
+
+def test_api_leaderboard_get() -> None:
+    """
+    Verify GET /api/leaderboard loads default leaderboard members successfully.
+    """
     response = client.get("/api/leaderboard")
     assert response.status_code == 200
     members = response.json()
     assert len(members) >= 3
-    # Check default seeds exist
     assert any(m["name"] == "Green Guru" for m in members)
 
-def test_api_leaderboard_post_and_delete():
+
+def test_api_leaderboard_post_and_delete() -> None:
+    """
+    Verify leaderboard posting is successful and deletion cleans up database correctly.
+    """
     # 1. Post a new friend member
-    new_member = {
+    new_member: Dict[str, Any] = {
         "id": "test-friend-99",
         "name": "Test Runner",
         "score": 2.45,
@@ -81,10 +105,12 @@ def test_api_leaderboard_post_and_delete():
     new_members = del_res.json()
     assert not any(m["id"] == "test-friend-99" for m in new_members)
 
-def test_api_leaderboard_prevent_delete_self():
-    # Try deleting a member marked as isSelf
-    # First, post a self member
-    self_member = {
+
+def test_api_leaderboard_prevent_delete_self() -> None:
+    """
+    Verify delete operations on the user's host profile are blocked by returning 400 Bad Request.
+    """
+    self_member: Dict[str, Any] = {
         "id": "user-self",
         "name": "Self User",
         "score": 1.25,
@@ -92,6 +118,5 @@ def test_api_leaderboard_prevent_delete_self():
     }
     client.post("/api/leaderboard", json=self_member)
     
-    # Try deleting it
     del_res = client.delete("/api/leaderboard/user-self")
     assert del_res.status_code == 400
