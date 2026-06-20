@@ -8,9 +8,9 @@ Developed specifically to help Indian households and users **track and reduce** 
 
 ## 📝 Project Details & Credits
 
-### 👥 Team & Credits
-* **Project Concept & Ideation**: Conceptualized by a **first-year B.Tech Student at the Indian Institute of Technology (IIT), Ropar** (using this project to learn full-stack Python/FastAPI architectures).
-* **Engineering & Code Implementation**: Built, coded, and implemented entirely by **Gemini** (Advanced Agentic AI platform from Google DeepMind), serving as the developer translating the project concept into software code.
+* **Hackathon Context**: Developed for **Google Prompt Wars** — moving beyond standard Colab notebooks to deliver a full-fledged, production-ready full-stack application.
+* **Project Concept & Ideation**: Conceptualized and designed by a **first-year B.Tech Student at the Indian Institute of Technology (IIT), Ropar**, studying full-stack web and backend architectures.
+* **Engineering & Code Implementation**: Built and written by **Gemini** (Advanced Agentic AI platform from Google DeepMind), serving as the developer translating the project concept and prompts into code.
 
 ### ⚙️ Technical Implementation
 This project uses the following technical structure to run the application:
