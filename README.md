@@ -8,9 +8,9 @@ Developed specifically to help Indian households and users **track and reduce** 
 
 ## 🏆 Hackathon Submission Details
 
-### 👥 Team & Architecture Credits
-* **System Architect & Designer**: Designed and conceptualized by a **first-year B.Tech Student at the Indian Institute of Technology (IIT), Ropar**.
-* **AI Core Architect & Coding Partner**: Co-developed and built in collaboration with **Gemini** (Google DeepMind Agentic Coding AI).
+### 👥 Team & Credits
+* **System Architect & Product Ideation**: Conceptualized, structured, and designed by a **first-year B.Tech Student at the Indian Institute of Technology (IIT), Ropar** (initiating the product design with no prior programming background).
+* **Engineering & Code Generation**: Built, implemented, and written entirely by **Gemini** (Advanced Agentic AI platform from Google DeepMind), serving as the primary developer translating architectural requirements into production-ready scripts.
 
 ### 🌟 Why EcoDial is a Winning Entry
 To win a hackathon, an entry must demonstrate not just a beautiful idea, but stellar engineering, security, and production readiness. EcoDial excels across all columns:
