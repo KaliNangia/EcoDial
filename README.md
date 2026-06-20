@@ -1,18 +1,10 @@
 # 🌱 EcoDial — Interactive Carbon Footprint Console
 
-EcoDial is a premium, full-stack carbon footprint awareness and tracking platform built for the hackathon. It features an interactive retro-aesthetic dial console, live charts, customizable carbon passport exports, and a synchronized community competition leaderboard.
-
-Developed specifically to help Indian households and users **track and reduce** their personal emission levels, it removes complex global treaties or references and focuses on immediate, local, actionable metrics.
+A vibe-coded solution designed to help individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
 
 ---
 
-## 📝 Project Details & Credits
-
-* **Hackathon Context**: Developed for **Google Prompt Wars** — moving beyond standard Colab notebooks to deliver a full-fledged, production-ready full-stack application.
-* **Project Concept & Ideation**: Conceptualized and designed by a **first-year B.Tech Student at the Indian Institute of Technology (IIT), Ropar**, studying full-stack web and backend architectures.
-* **Engineering & Code Implementation**: Built and written by **Gemini** (Advanced Agentic AI platform from Google DeepMind), serving as the developer translating the project concept and prompts into code.
-
-### ⚙️ Technical Implementation
+## ⚙️ Technical Implementation
 This project uses the following technical structure to run the application:
 1. **Decoupled Architecture**: Separates the **FastAPI backend API** from the **static Nginx frontend client** stack.
 2. **Containerized Orchestration**: Managed via **Docker & Docker Compose** to run both services together.
