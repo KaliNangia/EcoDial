@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoDial - Frontend Math Calculation Unit Tests</title>
+  
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #030805;
+      --card-bg: #07120a;
+      --border: rgba(16, 185, 129, 0.15);
+      --border-hover: rgba(16, 185, 129, 0.35);
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --excellent: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      line-height: 1.6;
+    }
+
+    header {
+      max-width: 1100px;
+      margin: 0 auto 2.5rem auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      font-size: 2rem;
+    }
+
+    .brand-title h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 0.1rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.6rem 1.2rem;
+      background-color: rgba(16, 185, 129, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .back-btn:hover {
+      background-color: rgba(16, 185, 129, 0.12);
+      border-color: var(--border-hover);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .summary-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: var(--muted);
+    }
+
+    .summary-card.passed::after {
+      background-color: var(--success);
+    }
+
+    .summary-card.failed::after {
+      background-color: var(--danger);
+    }
+
+    .summary-card.total::after {
+      background-color: var(--excellent);
+    }
+
+    .summary-card-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .summary-card-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .summary-card-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .test-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(7, 18, 10, 0.8) 0%, var(--card-bg) 100%);
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 99px;
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--border);
+      color: var(--primary);
+    }
+
+    .test-table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba(7, 18, 10, 0.5);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    td {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.08);
+      font-size: 0.9rem;
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background-color: rgba(16, 185, 129, 0.02);
+    }
+
+    .test-name {
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .test-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-pass {
+      background-color: rgba(16, 185, 129, 0.12);
+      border: 1px solid var(--success);
+      color: var(--success);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.1);
+    }
+
+    .badge-fail {
+      background-color: rgba(239, 68, 68, 0.12);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.1);
+    }
+
+    .code-block {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.8rem;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #c9d1d9;
+      max-width: 320px;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 3rem auto 0 auto;
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .back-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+
+  <!-- MOCK WINDOW INTERACTION & DOM FOR APP.JS COMPATIBILITY -->
+  <script>
+    // Create an all-purpose mock element to prevent app.js DOM manipulations from throwing errors
+    const mockElement = {
+      addEventListener: () => {},
+      querySelector: () => mockElement,
+      querySelectorAll: () => [mockElement],
+      style: {},
+      classList: {
+        add: () => {},
+        remove: () => {},
+        contains: () => false
+      },
+      appendChild: () => {},
+      value: "",
+      textContent: "",
+      innerHTML: ""
+    };
+
+    // Override document retrieval methods
+    document.getElementById = (id) => mockElement;
+    document.querySelector = (sel) => mockElement;
+    document.querySelectorAll = (sel) => [mockElement];
+
+    // Intercept DOMContentLoaded event listeners to load app.js as a dry math module
+    const originalAddEventListener = window.addEventListener;
+    window.addEventListener = function(event, callback, options) {
+      if (event === "DOMContentLoaded") {
+        window.domContentLoadedCallback = callback;
+        return;
+      }
+      return originalAddEventListener.apply(this, arguments);
+    };
+
+    // Mock localStorage to guarantee isolated test context
+    window.localStorage = {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {}
+    };
+  </script>
+
+  <!-- Load Ecodial Constants and Application Logic -->
+  <script src="../js/constants.js"></script>
+  <script src="../js/app.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="brand-logo">🧪</span>
+      <div class="brand-title">
+        <h1>EcoDial Test Runner</h1>
+        <p>Client Math &amp; Status Assertions</p>
+      </div>
+    </div>
+    <a href="../index.html" class="back-btn">← Back to App</a>
+  </header>
+
+  <main>
+    <!-- Summary Metrics -->
+    <section class="summary-grid" aria-label="Metrics Summary">
+      <div class="summary-card total" id="card-total">
+        <span class="summary-card-title">Total Tests</span>
+        <span class="summary-card-value" id="metrics-total">0</span>
+        <span class="summary-card-desc">Math &amp; status validations</span>
+      </div>
+      <div class="summary-card passed" id="card-passed">
+        <span class="summary-card-title">Passed</span>
+        <span class="summary-card-value" id="metrics-passed">0</span>
+        <span class="summary-card-desc">Successful assertions</span>
+      </div>
+      <div class="summary-card failed" id="card-failed">
+        <span class="summary-card-title">Failed</span>
+        <span class="summary-card-value" id="metrics-failed">0</span>
+        <span class="summary-card-desc">Check logic implementation</span>
+      </div>
+    </section>
+
+    <!-- Test List Card -->
+    <section class="test-section" aria-label="Assertions Results">
+      <div class="section-header">
+        <div class="section-title">
+          <span>Test Suite Executions</span>
+          <span class="section-badge" id="suite-status">Pending</span>
+        </div>
+      </div>
+      
+      <div class="test-table-container">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Test Case</th>
+              <th scope="col">Parameters / Inputs</th>
+              <th scope="col">Expected Result</th>
+              <th scope="col">Actual Result</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="test-results-body">
+            <!-- Dynamic rows injected here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>EcoDial Automated Testing System. High-fidelity verification of frontend client equations.</p>
+  </footer>
+
+  <!-- Assertions Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const resultsBody = document.getElementById("test-results-body");
+      const metricsTotal = document.getElementById("metrics-total");
+      const metricsPassed = document.getElementById("metrics-passed");
+      const metricsFailed = document.getElementById("metrics-failed");
+      const suiteStatus = document.getElementById("suite-status");
+
+      let totalCount = 0;
+      let passedCount = 0;
+      let failedCount = 0;
+
+      function deepEqual(obj1, obj2) {
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+      }
+
+      function runAssertion(name, desc, inputs, targetFunction, expected) {
+        totalCount++;
+        let actual;
+        let success = false;
+        
+        try {
+          actual = targetFunction(inputs);
+          success = deepEqual(actual, expected);
+        } catch (e) {
+          actual = `Error: ${e.message}`;
+          success = false;
+        }
+
+        if (success) {
+          passedCount++;
+        } else {
+          failedCount++;
+        }
+
+        // Render table row
+        const tr = document.createElement("tr");
+        
+        const tdName = document.createElement("td");
+        tdName.innerHTML = `<div class="test-name">${name}</div><div class="test-desc">${desc}</div>`;
+        
+        const tdInputs = document.createElement("td");
+        tdInputs.innerHTML = `<pre class="code-block">${JSON.stringify(inputs, null, 2)}</pre>`;
+        
+        const tdExpected = document.createElement("td");
+        tdExpected.innerHTML = `<pre class="code-block">${JSON.stringify(expected, null, 2)}</pre>`;
+        
+        const tdActual = document.createElement("td");
+        tdActual.innerHTML = `<pre class="code-block" style="color: ${success ? '#10b981' : '#ef4444'}">${JSON.stringify(actual, null, 2)}</pre>`;
+        
+        const tdStatus = document.createElement("td");
+        tdStatus.innerHTML = `<span class="badge ${success ? 'badge-pass' : 'badge-fail'}">${success ? 'Pass' : 'Fail'}</span>`;
+        
+        tr.appendChild(tdName);
+        tr.appendChild(tdInputs);
+        tr.appendChild(tdExpected);
+        tr.appendChild(tdActual);
+        tr.appendChild(tdStatus);
+        
+        resultsBody.appendChild(tr);
+      }
+
+      // Assertions Suite
+      
+      // Part 1: Carbon Calculation Formulas tests
+      const testCase1 = {
+        car_km_per_week: 150,
+        car_fuel: "petrol",
+        public_transit_km_per_week: 80,
+        short_haul_flights_per_year: 2,
+        long_haul_flights_per_year: 0,
+        electricity_kwh_per_month: 250,
+        natural_gas_kwh_per_month: 300,
+        household_size: 2,
+        diet: "medium_meat",
+        goods_spend_usd_per_month: 300,
+        waste_kg_per_week: 10
+      };
+      
+      runAssertion(
+        "runCalculation (Default Scenario)",
+        "Validates calculations using the baseline system inputs",
+        testCase1,
+        runCalculation,
+        {
+          breakdown: {
+            transport: 1923,
+            home: 1004,
+            diet: 2500,
+            consumption: 1742
+          },
+          total: 7169
+        }
+      );
+
+      const testCase2 = {
+        car_km_per_week: 0,
+        car_fuel: "electric",
+        public_transit_km_per_week: 0,
+        short_haul_flights_per_year: 0,
+        long_haul_flights_per_year: 0,
+        electricity_kwh_per_month: 0,
+        natural_gas_kwh_per_month: 0,
+        household_size: 1,
+        diet: "vegan",
+        goods_spend_usd_per_month: 0,
+        waste_kg_per_week: 0
+      };
+
+      runAssertion(
+        "runCalculation (Zero/Minimum Footprint)",
+        "Validates minimum emission profile (Vegan, no transport, zero household utility spend)",
+        testCase2,
+        runCalculation,
+        {
+          breakdown: {
+            transport: 0,
+            home: 0,
+            diet: 1050,
+            consumption: 0
+          },
+          total: 1050
+        }
+      );
+
+      const testCase3 = {
+        car_km_per_week: 1000,
+        car_fuel: "diesel",
+        public_transit_km_per_week: 500,
+        short_haul_flights_per_year: 10,
+        long_haul_flights_per_year: 5,
+        electricity_kwh_per_month: 1000,
+        natural_gas_kwh_per_month: 1500,
+        household_size: 4,
+        diet: "heavy_meat",
+        goods_spend_usd_per_month: 2000,
+        waste_kg_per_week: 80
+      };
+
+      runAssertion(
+        "runCalculation (High Footprint Profile)",
+        "Validates carbon formulas for a heavy emitter (High travel, high spend, heavy meat diet)",
+        testCase3,
+        runCalculation,
+        {
+          breakdown: {
+            transport: 17065,
+            home: 2174,
+            diet: 3300,
+            consumption: 12013
+          },
+          total: 34551
+        }
+      );
+
+      // Part 2: getStatusData tests
+      runAssertion(
+        "getStatusData (Sustainable)",
+        "Ensures Sustainable status is awarded below 2000 kg CO2e",
+        1500,
+        getStatusData,
+        {
+          statusText: "Sustainable",
+          statusEmoji: "(^_^)",
+          badgeClass: "badge badge-sustainable"
+        }
+      );
+
+      runAssertion(
+        "getStatusData (Moderate)",
+        "Ensures Moderate status is awarded between 2000 and 4800 kg CO2e",
+        3000,
+        getStatusData,
+        {
+          statusText: "Moderate",
+          statusEmoji: "(-_-)",
+          badgeClass: "badge badge-moderate"
+        }
+      );
+
+      runAssertion(
+        "getStatusData (High Emitted - 5000 kg)",
+        "Ensures High Emitted status is awarded above 4800 kg CO2e",
+        5000,
+        getStatusData,
+        {
+          statusText: "High Emitted",
+          statusEmoji: "(>_<)",
+          badgeClass: "badge badge-warning"
+        }
+      );
+
+      runAssertion(
+        "getStatusData (High Emitted - 7000 kg)",
+        "Ensures High Emitted status is awarded above 4800 kg CO2e",
+        7000,
+        getStatusData,
+        {
+          statusText: "High Emitted",
+          statusEmoji: "(>_<)",
+          badgeClass: "badge badge-warning"
+        }
+      );
+
+      // Update Summary Cards
+      metricsTotal.textContent = totalCount;
+      metricsPassed.textContent = passedCount;
+      metricsFailed.textContent = failedCount;
+
+      if (failedCount === 0) {
+        suiteStatus.textContent = "Passed";
+        suiteStatus.style.backgroundColor = "rgba(16, 185, 129, 0.12)";
+        suiteStatus.style.color = "var(--success)";
+        suiteStatus.style.borderColor = "var(--success)";
+      } else {
+        suiteStatus.textContent = "Failed";
+        suiteStatus.style.backgroundColor = "rgba(239, 68, 68, 0.12)";
+        suiteStatus.style.color = "var(--danger)";
+        suiteStatus.style.borderColor = "var(--danger)";
+      }
+    });
+  </script>
+</body>
+</html>

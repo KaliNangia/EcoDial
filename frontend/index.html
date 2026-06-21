@@ -43,7 +43,7 @@
       
       <!-- Main Dial Widget -->
       <div class="dial-wrapper">
-        <div class="dial-container" id="dial-interactive" role="slider" aria-label="Control Dial" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="dial-container" id="dial-interactive" tabindex="0" role="slider" aria-label="Control Dial" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <!-- Background Notch Circle -->
           <svg class="dial-svg" viewBox="0 0 200 200">
             <defs>
@@ -105,11 +105,6 @@
           <span id="sound-status-text">Audio Click: ON</span>
         </button>
       </div>
-      
-      <!-- Option Selector for Categorical Inputs -->
-      <div id="categorical-options-container" class="categorical-options hidden">
-        <!-- Dynmically filled buttons -->
-      </div>
     </section>
 
     <!-- Right Column: Results & Inputs Layout -->
@@ -121,10 +116,10 @@
           <div class="score-metric">
             <span class="score-label">Annual Carbon Footprint</span>
             <div class="score-number-wrapper">
-              <span id="score-value" class="score-number">0.00</span>
+              <span id="score-value" class="score-number" aria-live="polite">0.00</span>
               <span class="score-unit">tonnes CO<sub>2</sub>e</span>
             </div>
-            <div id="impact-badge" class="badge">Calculating...</div>
+          <div id="impact-badge" class="badge" aria-live="polite">Calculating...</div>
           </div>
           
           <div class="score-comparisons">
@@ -155,6 +150,20 @@
               </div>
               <div class="bar-track">
                 <div id="user-footprint-fill" class="bar-fill user-fill" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="comparison-bar">
+              <div class="comp-label-row">
+                <span style="display: flex; align-items: center; gap: 0.25rem;">
+                  <label for="personal-goal-input">My Goal Target</label>
+                  <input type="number" id="personal-goal-input" min="0.1" max="25.0" step="0.1" value="2.5" style="width: 45px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; padding: 1px 4px; color: #fff; font-size: 0.75rem; text-align: center; font-weight: bold; margin-left: 0.25rem;">
+                  <span>t</span>
+                </span>
+                <span id="personal-goal-status" class="goal-badge met">On Track</span>
+              </div>
+              <div class="bar-track">
+                <div id="personal-goal-fill" class="bar-fill goal-fill" style="width: 0%"></div>
               </div>
             </div>
           </div>
@@ -197,24 +206,24 @@
             </div>
           </div>
           
-          <button id="download-card-btn" class="btn btn-download-pass">📥 Download Passport Card Image</button>
+          <button id="download-card-btn" class="btn btn-download-pass"><span role="img" aria-label="download">📥</span> Download Passport Card Image</button>
         </div>
       </section>
 
       <!-- Category Navigation & Cards Grid -->
       <section class="inputs-panel card" aria-labelledby="inputs-heading">
         <h2 id="inputs-heading" class="visually-hidden">Input Parameters</h2>
-        <div class="tabs-header">
-          <button class="tab-btn active" data-category="transport">🚗 Transport</button>
-          <button class="tab-btn" data-category="home">🏡 Home Energy</button>
-          <button class="tab-btn" data-category="lifestyle">🍽️ Lifestyle</button>
+        <div class="tabs-header" role="tablist" aria-label="Carbon Input Categories">
+          <button class="tab-btn active" id="tab-btn-transport" role="tab" aria-selected="true" aria-controls="tab-transport" data-category="transport"><span role="img" aria-label="car">🚗</span> Transport</button>
+          <button class="tab-btn" id="tab-btn-home" role="tab" aria-selected="false" aria-controls="tab-home" data-category="home"><span role="img" aria-label="home">🏡</span> Home Energy</button>
+          <button class="tab-btn" id="tab-btn-lifestyle" role="tab" aria-selected="false" aria-controls="tab-lifestyle" data-category="lifestyle"><span role="img" aria-label="diet">🍽️</span> Lifestyle</button>
         </div>
 
         <div class="tabs-content">
           <!-- Transport Tab Content -->
-          <div class="tab-pane active" id="tab-transport">
+          <div class="tab-pane active" id="tab-transport" role="tabpanel" aria-labelledby="tab-btn-transport">
             <div class="cards-grid">
-              <div class="param-card active" id="card-car_km_per_week" data-id="car_km_per_week">
+              <div class="param-card active" id="card-car_km_per_week" data-id="car_km_per_week" tabindex="0" role="button" aria-pressed="true">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="1" y="3" width="15" height="13" rx="2" ry="2"></rect>
@@ -232,7 +241,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-car_fuel" data-id="car_fuel">
+              <div class="param-card" id="card-car_fuel" data-id="car_fuel" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 22h12M4 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"></path>
@@ -248,7 +257,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-public_transit_km_per_week" data-id="public_transit_km_per_week">
+              <div class="param-card" id="card-public_transit_km_per_week" data-id="public_transit_km_per_week" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
@@ -266,7 +275,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-short_haul_flights_per_year" data-id="short_haul_flights_per_year">
+              <div class="param-card" id="card-short_haul_flights_per_year" data-id="short_haul_flights_per_year" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -284,7 +293,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-long_haul_flights_per_year" data-id="long_haul_flights_per_year">
+              <div class="param-card" id="card-long_haul_flights_per_year" data-id="long_haul_flights_per_year" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4.5 19.5 3S18 3 16.5 4.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.7c-.2.4-.1.9.3 1.1L9 11.5l-3 3-2.3-.5c-.4-.1-.8.1-1 .4l-.4.5c-.2.4-.1.8.3 1l3 1.5 1.5 3c.2.4.6.5 1 .3l.5-.4c.3-.2.5-.6.4-1l-.5-2.3 3-3 3.3 5.3c.2.4.7.5 1.1.3l.7-.3c.4-.2.6-.6.5-1.1z"></path>
@@ -302,9 +311,9 @@
           </div>
 
           <!-- Home Energy Tab Content -->
-          <div class="tab-pane" id="tab-home">
+          <div class="tab-pane" id="tab-home" role="tabpanel" aria-labelledby="tab-btn-home">
             <div class="cards-grid">
-              <div class="param-card" id="card-electricity_kwh_per_month" data-id="electricity_kwh_per_month">
+              <div class="param-card" id="card-electricity_kwh_per_month" data-id="electricity_kwh_per_month" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -319,7 +328,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-natural_gas_kwh_per_month" data-id="natural_gas_kwh_per_month">
+              <div class="param-card" id="card-natural_gas_kwh_per_month" data-id="natural_gas_kwh_per_month" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 2c1.88 0 3.39 1.19 4.02 2.82a5.093 5.093 0 0 0-4.02 1.34c-2 2-2 5.02 0 7.02s5.02 2 7.02 0a5.093 5.093 0 0 0 1.34-4.02C20.81 9.8 22 11.31 22 13.19C22 18.06 17.52 22 12 22S2 18.06 2 13.19C2 7.52 7.52 2 12 2z"></path>
@@ -334,7 +343,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-household_size" data-id="household_size">
+              <div class="param-card" id="card-household_size" data-id="household_size" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -355,9 +364,9 @@
           </div>
 
           <!-- Lifestyle Tab Content -->
-          <div class="tab-pane" id="tab-lifestyle">
+          <div class="tab-pane" id="tab-lifestyle" role="tabpanel" aria-labelledby="tab-btn-lifestyle">
             <div class="cards-grid">
-              <div class="param-card" id="card-diet" data-id="diet">
+              <div class="param-card" id="card-diet" data-id="diet" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -373,7 +382,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-goods_spend_usd_per_month" data-id="goods_spend_usd_per_month">
+              <div class="param-card" id="card-goods_spend_usd_per_month" data-id="goods_spend_usd_per_month" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
@@ -389,7 +398,7 @@
                 </div>
               </div>
 
-              <div class="param-card" id="card-waste_kg_per_week" data-id="waste_kg_per_week">
+              <div class="param-card" id="card-waste_kg_per_week" data-id="waste_kg_per_week" tabindex="0" role="button" aria-pressed="false">
                 <div class="card-icon-wrapper">
                   <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -414,28 +423,33 @@
       <!-- Category Visual Breakdown Chart -->
       <section class="breakdown-card card" aria-labelledby="breakdown-heading">
         <h2 id="breakdown-heading">Emissions Breakdown</h2>
-        <div class="breakdown-chart" id="breakdown-chart-bars">
+        <p class="console-sub" style="margin-bottom: 1rem;">Click on any category bar below to view details and personalized educational insights.</p>
+        <div class="breakdown-chart" id="breakdown-chart-bars" aria-live="polite">
           <!-- Dynamic chart rows generated by JS -->
-          <div class="bar-row">
+          <div class="bar-row" style="cursor: pointer;" tabindex="0" role="button" aria-label="View Transport breakdown details" id="breakdown-row-transport">
             <span>🚗 Transport</span>
             <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-transport" style="width: 0%"></div></div>
             <span id="breakdown-val-transport">0.00 t</span>
           </div>
-          <div class="bar-row">
+          <div class="bar-row" style="cursor: pointer;" tabindex="0" role="button" aria-label="View Home Energy breakdown details" id="breakdown-row-home">
             <span>🏡 Home Energy</span>
             <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-home" style="width: 0%"></div></div>
             <span id="breakdown-val-home">0.00 t</span>
           </div>
-          <div class="bar-row">
+          <div class="bar-row" style="cursor: pointer;" tabindex="0" role="button" aria-label="View Diet breakdown details" id="breakdown-row-diet">
             <span>🍽️ Diet</span>
             <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-diet" style="width: 0%"></div></div>
             <span id="breakdown-val-diet">0.00 t</span>
           </div>
-          <div class="bar-row">
+          <div class="bar-row" style="cursor: pointer;" tabindex="0" role="button" aria-label="View Consumption breakdown details" id="breakdown-row-consumption">
             <span>🛍️ Consumption</span>
             <div class="bar-track"><div class="bar-fill user-fill" id="breakdown-fill-consumption" style="width: 0%"></div></div>
             <span id="breakdown-val-consumption">0.00 t</span>
           </div>
+        </div>
+        <div id="breakdown-details-panel" class="hidden" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.25rem; font-size: 0.85rem; line-height: 1.6; text-align: left; animation: fadeIn 0.3s ease;">
+          <h3 id="breakdown-details-title" style="font-size: 0.95rem; font-weight: 700; color: #a7f3d0; margin-bottom: 0.5rem;">Category Details</h3>
+          <p id="breakdown-details-text" style="color: #cbd5e1;"></p>
         </div>
       </section>
 
@@ -448,26 +462,50 @@
         <ul class="plain-list" id="recommendations-list">
           <!-- Dynamic list of recommendations -->
         </ul>
+        
+        <!-- My Active Commitments -->
+        <h3 class="board-title" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">🌱 My Active Commitments</h3>
+        <div class="commitments-progress" style="margin-bottom: 1rem;">
+          <div class="comp-label-row">
+            <span>Total Carbon Saved</span>
+            <span id="commitments-total-saved" aria-live="polite">0 kg CO2e / yr</span>
+          </div>
+          <div class="bar-track" style="margin-top: 0.25rem;">
+            <div id="commitments-progress-bar" class="bar-fill user-fill" style="width: 0%; background: linear-gradient(90deg, #10b981 0%, #34d399 100%);"></div>
+          </div>
+        </div>
+        <ul class="plain-list" id="commitments-list" aria-live="polite">
+          <li style="color: var(--muted); font-style: italic; font-size: 0.85rem;" id="commitments-empty-msg">No active commitments yet. Commit to actions above to start reducing your carbon footprint.</li>
+        </ul>
       </section>
 
       <!-- History Snapshots Logs -->
       <section class="history-card card" aria-labelledby="history-heading">
         <h2 id="history-heading">Saved Snapshots</h2>
         <div class="history-controls">
-          <button id="save-snapshot-btn" class="btn">💾 Save Snapshot</button>
-          <button id="reset-platform-btn" class="btn secondary">🔄 Reset Inputs</button>
+          <button id="save-snapshot-btn" class="btn"><span role="img" aria-label="save">💾</span> Save Snapshot</button>
+          <button id="reset-platform-btn" class="btn secondary"><span role="img" aria-label="reset">🔄</span> Reset Inputs</button>
         </div>
-        <div class="table-wrapper">
+
+        <!-- Trend chart container -->
+        <div id="history-trend-container" class="history-trend-container" style="display: none; margin-bottom: 2rem;">
+          <h3 style="font-size: 0.9rem; font-weight: 700; color: #75a38a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">📈 Footprint Trend (tonnes CO2e)</h3>
+          <div class="trend-chart-wrapper" style="background: rgba(0, 0, 0, 0.15); border: 1px solid var(--border); border-radius: var(--radius-inner); padding: 1rem; position: relative;">
+            <svg id="trend-svg" viewBox="0 0 600 160" preserveAspectRatio="none" style="width: 100%; height: 160px; overflow: visible;"></svg>
+          </div>
+        </div>
+
+        <div class="table-wrapper" aria-live="polite">
           <table class="history" id="history-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Total Footprint</th>
-                <th>Transport</th>
-                <th>Home</th>
-                <th>Diet</th>
-                <th>Consumption</th>
-                <th style="text-align: right;">Action</th>
+                <th scope="col">Date</th>
+                <th scope="col">Total Footprint</th>
+                <th scope="col">Transport</th>
+                <th scope="col">Home</th>
+                <th scope="col">Diet</th>
+                <th scope="col">Consumption</th>
+                <th scope="col" style="text-align: right;">Action</th>
               </tr>
             </thead>
             <tbody id="history-table-body">
@@ -494,12 +532,12 @@
             <label for="friend-score-input">Carbon footprint (tonnes)</label>
             <input type="number" id="friend-score-input" placeholder="e.g. 3.2" step="0.1" min="0" max="30">
           </div>
-          <button id="add-friend-btn" class="btn" style="margin-top: 1.5rem;">👤 Add Member</button>
+          <button id="add-friend-btn" class="btn" style="margin-top: 1.5rem;"><span role="img" aria-label="user">👤</span> Add Member</button>
         </div>
 
         <!-- Warning Lights Board -->
         <h3 class="board-title">🚨 System Status Lights</h3>
-        <div class="status-light-board" id="status-lights-grid">
+        <div class="status-light-board" id="status-lights-grid" aria-live="polite">
           <!-- Dynamically populated with status LEDs -->
         </div>
 
@@ -509,11 +547,11 @@
           <table class="history" id="leaderboard-table">
             <thead>
               <tr>
-                <th>Rank</th>
-                <th>Member Name</th>
-                <th>Footprint Score</th>
-                <th>Carbon Status</th>
-                <th style="text-align: right;">Action</th>
+                <th scope="col">Rank</th>
+                <th scope="col">Member Name</th>
+                <th scope="col">Footprint Score</th>
+                <th scope="col">Carbon Status</th>
+                <th scope="col" style="text-align: right;">Action</th>
               </tr>
             </thead>
             <tbody id="leaderboard-table-body">
@@ -530,6 +568,10 @@
   </footer>
 
   <!-- Application Logic -->
+  <script src="js/constants.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/passport.js"></script>
+  <script src="js/chart.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

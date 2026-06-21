@@ -6,7 +6,7 @@
   --surface: rgba(6, 26, 18, 0.45);
   --surface-hover: rgba(9, 36, 25, 0.6);
   --text: #f8fafc;
-  --muted: #4b6b5b;
+  --muted: #8cb09d;
   --primary: #10b981; /* Emerald green */
   --primary-glow: rgba(16, 185, 129, 0.4);
   --blue-accent: #34d399; /* Mint green for moderate */
@@ -118,7 +118,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 .app-header p {
-  color: #4b8066;
+  color: #75a38a;
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -175,7 +175,7 @@ body {
 }
 .console-sub {
   font-size: 0.85rem;
-  color: #618774;
+  color: #8cb09d;
   margin-bottom: 2rem;
 }
 
@@ -200,7 +200,7 @@ body {
 .dial-range-lbl {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #4b8066;
+  color: #75a38a;
   background: rgba(16, 185, 129, 0.04);
   border: 1px solid var(--border);
   padding: 2px 8px;
@@ -325,7 +325,7 @@ body {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #4f7962;
+  color: #8cb09d;
   font-weight: 700;
   max-width: 90px;
   overflow: hidden;
@@ -342,7 +342,7 @@ body {
 }
 .dial-display-unit {
   font-size: 0.65rem;
-  color: #4f7962;
+  color: #8cb09d;
   font-weight: 500;
 }
 
@@ -381,7 +381,7 @@ body {
 .btn-toggle-sound {
   background: transparent;
   border: none;
-  color: #4f7962;
+  color: #8cb09d;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -459,7 +459,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #618774;
+  color: #8cb09d;
 }
 .score-number-wrapper {
   margin: 0.5rem 0;
@@ -477,7 +477,7 @@ body {
 }
 .score-unit {
   font-size: 1rem;
-  color: #618774;
+  color: #8cb09d;
   font-weight: 600;
 }
 .badge {
@@ -523,7 +523,7 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: #618774;
+  color: #8cb09d;
   font-weight: 600;
 }
 .bar-track {
@@ -541,11 +541,9 @@ body {
 }
 .sustainable-fill {
   background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, var(--primary) 100%);
-  width: 41.6% !important;
 }
 .avg-fill {
   background: linear-gradient(90deg, rgba(52, 211, 153, 0.2) 0%, var(--blue-accent) 100%);
-  width: 100% !important;
 }
 .user-fill {
   background: linear-gradient(90deg, #059669 0%, #10b981 100%);
@@ -555,6 +553,30 @@ body {
   background: linear-gradient(90deg, #10b981 0%, #ef4444 100%);
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
 }
+.goal-fill {
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+.goal-badge {
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+.goal-badge.met {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.goal-badge.over {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 
 /* Category Tabs navigation */
 .tabs-header {
@@ -567,7 +589,7 @@ body {
 .tab-btn {
   background: transparent;
   border: none;
-  color: #4f7962;
+  color: #8cb09d;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
@@ -628,7 +650,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4f7962;
+  color: #8cb09d;
   transition: all 0.3s ease;
 }
 .param-card.active .card-icon-wrapper {
@@ -646,7 +668,7 @@ body {
 .card-info h3 {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #618774;
+  color: #8cb09d;
   margin-bottom: 0.25rem;
 }
 .card-val-row {
@@ -664,7 +686,7 @@ body {
 }
 .card-unit {
   font-size: 0.7rem;
-  color: #4f7962;
+  color: #8cb09d;
   font-weight: 500;
 }
 
@@ -695,7 +717,7 @@ body {
 /* Actions Card / Recommendations */
 .insights-summary {
   font-size: 0.85rem;
-  color: #618774;
+  color: #8cb09d;
   line-height: 1.6;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
@@ -787,7 +809,7 @@ table.history td {
 }
 table.history th {
   font-weight: 700;
-  color: #4b8066;
+  color: #75a38a;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 2px solid var(--border);
@@ -879,7 +901,7 @@ table.history tbody tr:hover {
 .ecocard-type {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #4f7962;
+  color: #8cb09d;
   letter-spacing: 0.1em;
 }
 .ecocard-body {
@@ -896,7 +918,7 @@ table.history tbody tr:hover {
 .ecocard-label {
   font-size: 0.55rem;
   font-weight: 700;
-  color: #4b8066;
+  color: #75a38a;
   letter-spacing: 0.08em;
   margin-bottom: 0.15rem;
 }
@@ -944,7 +966,7 @@ table.history tbody tr:hover {
   display: flex;
   justify-content: space-between;
   font-size: 0.55rem;
-  color: #4b8066;
+  color: #75a38a;
   font-weight: 600;
   letter-spacing: 0.05em;
   z-index: 2;
@@ -1094,7 +1116,7 @@ table.history tbody tr:hover {
 .app-footer {
   text-align: center;
   padding: 3rem 1.5rem;
-  color: #4b6b5b;
+  color: #8cb09d;
   font-size: 0.75rem;
   border-top: 1px solid var(--border);
   margin-top: 4rem;
@@ -1163,3 +1185,30 @@ table.history tbody tr:hover {
     animation: none !important;
   }
 }
+
+/* History Trend Chart Styling */
+.history-trend-container {
+  margin-top: 1rem;
+}
+.trend-chart-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-inner);
+}
+.trend-chart-wrapper svg {
+  min-width: 500px;
+}
+.trend-chart-wrapper line {
+  stroke-width: 1px;
+}
+.trend-chart-wrapper text {
+  font-family: inherit;
+  pointer-events: none;
+}
+.trend-chart-wrapper circle {
+  transition: r 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+}
+.trend-chart-wrapper circle:hover {
+  r: 7;
+}
+

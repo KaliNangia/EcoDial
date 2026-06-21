@@ -1,6 +1,7 @@
 # Pydantic Schemas for Input Validation and API Serialization
 
-from pydantic import BaseModel, Field
+import re
+from pydantic import BaseModel, Field, field_validator
 from typing import Literal
 
 class FootprintInputs(BaseModel):
@@ -17,7 +18,21 @@ class FootprintInputs(BaseModel):
     waste_kg_per_week: float = Field(default=10.0, ge=0.0, le=300.0, description="Weekly waste in kg")
 
 class LeaderboardMember(BaseModel):
-    id: str = Field(..., description="Unique user or seed identifier")
+    id: str = Field(..., min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9\-_]+$", description="Unique user or seed identifier")
     name: str = Field(..., min_length=1, max_length=50, description="Member name")
     score: float = Field(..., ge=0.0, description="Leaderboard score in annual tonnes")
     isSelf: bool = Field(default=False, description="Flag representing the local user")
+
+    @field_validator("name")
+    @classmethod
+    def sanitize_name(cls, v: str) -> str:
+        # Strip whitespace
+        v = v.strip()
+        # Simple HTML tag removal: strip anything between < and >
+        v = re.sub(r"<[^>]*>", "", v)
+        # Check name length after sanitization
+        if len(v) < 1:
+            raise ValueError("Name cannot be empty after sanitizing HTML tags.")
+        if len(v) > 50:
+            raise ValueError("Name cannot exceed 50 characters.")
+        return v

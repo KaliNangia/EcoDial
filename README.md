@@ -2,6 +2,19 @@
 
 **Live Web Application**: [https://ecodial-484628711205.us-central1.run.app](https://ecodial-484628711205.us-central1.run.app)
 
+> [!NOTE]
+> This application is proud to be **100% vibe coded** — built via iterative partner collaboration, leveraging state-of-the-art AI-driven design, rapid prototyping, and automated software agents to achieve pristine engineering, security compliance, and WCAG AA accessibility.
+
+---
+
+## 📸 Screenshots
+
+| Interactive Dashboard | Tactile Input Parameters | Emissions Category Breakdown |
+| :---: | :---: | :---: |
+| ![Interactive Dashboard](docs/screenshots/screenshot2.png) | ![Tactile Inputs](docs/screenshots/screenshot6.png) | ![Category Breakdown](docs/screenshots/screenshot4.png) |
+| **Saved Snapshots & SVG Trend** | **Shareable Carbon Passport** | **Community Leaderboard** |
+| ![Saved Snapshots & Trend](docs/screenshots/screenshot1.png) | ![Carbon Passport](docs/screenshots/screenshot3.png) | ![Leaderboard](docs/screenshots/screenshot5.png) |
+
 ---
 
 ## 🎯 Chosen Vertical

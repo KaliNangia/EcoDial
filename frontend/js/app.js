@@ -1,51 +1,5 @@
 // EcoDial Carbon Footprint Awareness Application Logic (Modular Client App)
 
-// ==========================================
-// 1. Core State, API Base URL and Constants
-// ==========================================
-
-const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? (window.location.port === "8080" ? "http://localhost:8000" : "")
-  : "";
-
-const WEEKS_PER_YEAR = 52;
-const MONTHS_PER_YEAR = 12;
-
-// Local calculation factors in case of offline server fallback
-const CAR_FACTORS_PER_KM = {
-  petrol: 0.170,
-  diesel: 0.171,
-  hybrid: 0.120,
-  electric: 0.047
-};
-
-const PUBLIC_TRANSIT_PER_KM = 0.060;
-const FLIGHT_SHORT_HAUL_PER_KM = 0.158;
-const FLIGHT_LONG_HAUL_PER_KM = 0.150;
-
-const SHORT_HAUL_TRIP_KM = 1100.0;
-const LONG_HAUL_TRIP_KM = 6500.0;
-
-const ELECTRICITY_PER_KWH = 0.450;
-const NATURAL_GAS_PER_KWH = 0.183;
-
-const DIET_ANNUAL_KG = {
-  heavy_meat: 3300.0,
-  medium_meat: 2500.0,
-  low_meat: 1900.0,
-  pescatarian: 1700.0,
-  vegetarian: 1500.0,
-  vegan: 1050.0
-};
-
-const GOODS_PER_USD_MONTHLY = 0.40;
-const WASTE_PER_KG = 0.580;
-
-const GLOBAL_AVG_ANNUAL_KG = 4800.0;
-const SUSTAINABLE_TARGET_ANNUAL_KG = 2000.0;
-
-const DIET_LADDER = ["heavy_meat", "medium_meat", "low_meat", "pescatarian", "vegetarian", "vegan"];
-
 // Default User Inputs State
 let userInputs = {
   car_km_per_week: 150,
@@ -61,57 +15,10 @@ let userInputs = {
   waste_kg_per_week: 10
 };
 
-// Parameter Specifications
-const PARAM_SPECS = {
-  car_km_per_week: { label: "Car Driving", min: 0, max: 2000, step: 10, unit: "km / week", category: "transport" },
-  car_fuel: { label: "Car Fuel Type", isCategoric: true, options: ["petrol", "diesel", "hybrid", "electric"], category: "transport" },
-  public_transit_km_per_week: { label: "Public Transit", min: 0, max: 2000, step: 10, unit: "km / week", category: "transport" },
-  short_haul_flights_per_year: { label: "Short Flights", min: 0, max: 50, step: 1, unit: "trips / year", category: "transport" },
-  long_haul_flights_per_year: { label: "Long Flights", min: 0, max: 30, step: 1, unit: "trips / year", category: "transport" },
-  electricity_kwh_per_month: { label: "Electricity", min: 0, max: 5000, step: 20, unit: "kWh / month", category: "home" },
-  natural_gas_kwh_per_month: { label: "Natural Gas", min: 0, max: 5000, step: 20, unit: "kWh / month", category: "home" },
-  household_size: { label: "Household Size", min: 1, max: 15, step: 1, unit: "people", category: "home" },
-  diet: { label: "Primary Diet", isCategoric: true, options: ["heavy_meat", "medium_meat", "low_meat", "pescatarian", "vegetarian", "vegan"], category: "lifestyle" },
-  goods_spend_usd_per_month: { label: "Goods Spending", min: 0, max: 10000, step: 50, unit: "USD / month", category: "lifestyle" },
-  waste_kg_per_week: { label: "Landfill Waste", min: 0, max: 300, step: 1, unit: "kg / week", category: "lifestyle" }
-};
-
 let activeParamId = "car_km_per_week";
-let audioEnabled = true;
 let isDragging = false;
-
-// Web Audio API click synthesiser
-let audioCtx = null;
-
-function playClickSound() {
-  if (!audioEnabled) return;
-  try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-    
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.012);
-    
-    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.012);
-    
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.012);
-  } catch (e) {
-    console.warn("Web Audio failure: ", e);
-  }
-}
+let activeCommitments = [];
+let personalGoal = 2.5;
 
 // ==========================================
 // 2. DOM Elements
@@ -139,6 +46,11 @@ const scoreValue = document.getElementById("score-value");
 const impactBadge = document.getElementById("impact-badge");
 const comparisonUserVal = document.getElementById("comparison-user-val");
 const userFootprintFill = document.getElementById("user-footprint-fill");
+const personalGoalInput = document.getElementById("personal-goal-input");
+const personalGoalStatus = document.getElementById("personal-goal-status");
+const personalGoalFill = document.getElementById("personal-goal-fill");
+const sustainableFill = document.querySelector(".sustainable-fill");
+const avgFill = document.querySelector(".avg-fill");
 
 const tabBtns = document.querySelectorAll(".tab-btn");
 const tabPanes = document.querySelectorAll(".tab-pane");
@@ -207,11 +119,10 @@ function updateTicksHighlight(ratio) {
 
 function updateAllCardVisuals() {
   Object.keys(PARAM_SPECS).forEach((paramId) => {
-    const spec = PARAM_SPECS[paramId];
     const value = userInputs[paramId];
     const displayValSpan = document.getElementById(`val-${paramId}`);
     if (displayValSpan) {
-      displayValSpan.textContent = typeof value === "number" ? value.toLocaleString() : value.replace("_", " ");
+      displayValSpan.textContent = typeof value === "number" ? value.toLocaleString() : String(value).replace(/_/g, " ");
     }
   });
 }
@@ -259,8 +170,17 @@ function updateDialVisuals() {
     displayValSpan.textContent = typeof value === "number" ? value.toLocaleString() : value.replace("_", " ");
   }
 
-  dialInteractive.setAttribute("aria-valuenow", typeof value === "number" ? value : 0);
-  dialInteractive.setAttribute("aria-valuetext", String(value).replace("_", " "));
+  // Update dynamic ARIA roles for screen reader accessibility
+  dialInteractive.setAttribute("aria-valuemin", spec.isCategoric ? 0 : spec.min);
+  dialInteractive.setAttribute("aria-valuemax", spec.isCategoric ? spec.options.length - 1 : spec.max);
+  dialInteractive.setAttribute("aria-valuenow", spec.isCategoric ? spec.options.indexOf(value) : value);
+  dialInteractive.setAttribute("aria-valuetext", spec.isCategoric ? String(value).replace("_", " ") : `${value} ${spec.unit || ""}`);
+  dialInteractive.setAttribute("aria-label", `Control Dial for ${spec.label}`);
+
+  paramCards.forEach((c) => {
+    const isParamActive = c.getAttribute("data-id") === activeParamId;
+    c.setAttribute("aria-pressed", isParamActive ? "true" : "false");
+  });
 }
 
 
@@ -449,9 +369,10 @@ function generateInsights(inputs, breakdown, totalKg) {
                               (inputs.long_haul_flights_per_year * LONG_HAUL_TRIP_KM * FLIGHT_LONG_HAUL_PER_KM);
       
       if ((inputs.short_haul_flights_per_year + inputs.long_haul_flights_per_year) > 0 && flightEmissions > carEmissions) {
+        const totalFlights = inputs.short_haul_flights_per_year + inputs.long_haul_flights_per_year;
         recommendations.push({
           category: "transport",
-          action: "Replace one or more flights per year with rail or video calls, and combine trips to halve aviation emissions.",
+          action: `Your ${totalFlights} annual flight(s) produce ${Math.round(flightEmissions).toLocaleString()} kg CO2e. Replacing just one flight with rail or video calls would save ~${Math.round(flightEmissions / totalFlights).toLocaleString()} kg.`,
           savings: Math.round(0.5 * amount)
         });
       } else if (inputs.car_km_per_week > 0 && inputs.car_fuel !== "electric") {
@@ -461,23 +382,26 @@ function generateInsights(inputs, breakdown, totalKg) {
         if (savings > 0) {
           recommendations.push({
             category: "transport",
-            action: "Shift short car trips to walking, cycling or public transit, and consider an electric vehicle for the rest.",
+            action: `Your ${inputs.car_km_per_week} km/week ${inputs.car_fuel} driving emits ${Math.round(currentCar).toLocaleString()} kg CO2e/yr. Switching to electric would save ${savings.toLocaleString()} kg — or cut 30 km/week for a quick ${Math.round(30 * WEEKS_PER_YEAR * CAR_FACTORS_PER_KM[inputs.car_fuel]).toLocaleString()} kg saving.`,
             savings: savings
           });
         }
       } else {
         recommendations.push({
           category: "transport",
-          action: "Carpool or use public transit for routine journeys to cut transport emissions.",
+          action: `Your transport emits ${Math.round(amount).toLocaleString()} kg CO2e/yr. Carpooling or using public transit for routine journeys could cut ~20%.`,
           savings: Math.round(0.2 * amount)
         });
       }
     }
     
     if (category === "home" && amount > 0) {
+      const elecAnnual = Math.round(inputs.electricity_kwh_per_month * MONTHS_PER_YEAR * ELECTRICITY_PER_KWH);
+      const gasAnnual = Math.round(inputs.natural_gas_kwh_per_month * MONTHS_PER_YEAR * NATURAL_GAS_PER_KWH);
+      const bigger = elecAnnual > gasAnnual ? `electricity (${elecAnnual.toLocaleString()} kg)` : `gas heating (${gasAnnual.toLocaleString()} kg)`;
       recommendations.push({
         category: "home",
-        action: "Switch to a renewable electricity tariff and improve insulation/thermostat settings to cut roughly a third of home energy.",
+        action: `Your biggest home source is ${bigger}. Switching to a renewable tariff and improving insulation could save ~${Math.round(0.33 * amount).toLocaleString()} kg CO2e/yr.`,
         savings: Math.round(0.33 * amount)
       });
     }
@@ -490,7 +414,7 @@ function generateInsights(inputs, breakdown, totalKg) {
         if (savings > 0) {
           recommendations.push({
             category: "diet",
-            action: `Shift toward a ${target.replace("_", " ")} diet — even a few plant-based days each week helps significantly.`,
+            action: `Your ${inputs.diet.replace("_", " ")} diet produces ${DIET_ANNUAL_KG[inputs.diet].toLocaleString()} kg CO2e/yr. Shifting to ${target.replace("_", " ")} saves ${savings.toLocaleString()} kg — even a few plant-based days weekly helps.`,
             savings: savings
           });
         }
@@ -498,9 +422,11 @@ function generateInsights(inputs, breakdown, totalKg) {
     }
     
     if (category === "consumption" && amount > 0) {
+      const goodsAnnual = Math.round(inputs.goods_spend_usd_per_month * MONTHS_PER_YEAR * GOODS_PER_USD_MONTHLY);
+      const wasteAnnual = Math.round(inputs.waste_kg_per_week * WEEKS_PER_YEAR * WASTE_PER_KG);
       recommendations.push({
         category: "consumption",
-        action: "Buy less and choose durable, second-hand or repairable goods, and reduce waste by composting and recycling.",
+        action: `Your spending adds ${goodsAnnual.toLocaleString()} kg and waste adds ${wasteAnnual.toLocaleString()} kg CO2e/yr. Buying durable/second-hand goods and composting could save ~${Math.round(0.25 * amount).toLocaleString()} kg.`,
         savings: Math.round(0.25 * amount)
       });
     }
@@ -584,14 +510,44 @@ function renderCalculationResult(result) {
   cardStatusVal.innerHTML = `${statusEmoji} ${statusText}`;
   cardStatusVal.className = "ecocard-status";
   
-  // Render comparison tracker bar
-  const globalProportion = Math.min(130, (result.total / GLOBAL_AVG_ANNUAL_KG) * 100);
-  userFootprintFill.style.width = `${globalProportion}%`;
+  // Render comparison tracker bars (scaled dynamically relative to the maximum)
+  const maxBarVal = Math.max(4.8, totalTonnes, personalGoal, 2.0);
   
-  if (result.total > GLOBAL_AVG_ANNUAL_KG) {
-    userFootprintFill.classList.add("over-avg");
-  } else {
-    userFootprintFill.classList.remove("over-avg");
+  const sustainablePct = (2.0 / maxBarVal) * 100;
+  if (sustainableFill) {
+    sustainableFill.style.width = `${sustainablePct}%`;
+  }
+  
+  const avgPct = (4.8 / maxBarVal) * 100;
+  if (avgFill) {
+    avgFill.style.width = `${avgPct}%`;
+  }
+  
+  const userPct = (totalTonnes / maxBarVal) * 100;
+  if (userFootprintFill) {
+    userFootprintFill.style.width = `${userPct}%`;
+    if (result.total > GLOBAL_AVG_ANNUAL_KG) {
+      userFootprintFill.classList.add("over-avg");
+    } else {
+      userFootprintFill.classList.remove("over-avg");
+    }
+  }
+  
+  const goalPct = (personalGoal / maxBarVal) * 100;
+  if (personalGoalFill) {
+    personalGoalFill.style.width = `${goalPct}%`;
+  }
+  
+  // Render goal status badge
+  if (personalGoalStatus) {
+    if (totalTonnes <= personalGoal) {
+      personalGoalStatus.textContent = "Goal Met";
+      personalGoalStatus.className = "goal-badge met";
+    } else {
+      const over = totalTonnes - personalGoal;
+      personalGoalStatus.textContent = `+${over.toFixed(1)} t Over`;
+      personalGoalStatus.className = "goal-badge over";
+    }
   }
   
   // Render category breakdown chart (each category scales absolute relative to 6.0 tonnes)
@@ -622,9 +578,17 @@ function renderCalculationResult(result) {
     recommendationsList.innerHTML = `<li style="color: var(--muted); font-style: italic; font-size: 0.85rem;">No recommendations needed! Operating inside targets.</li>`;
   } else {
     insights.recommendations.forEach((rec) => {
+      const isCommitted = activeCommitments.some(c => c.action === rec.action);
       const li = document.createElement("li");
       li.className = "recommendation";
-      li.innerHTML = `
+      li.style.display = "flex";
+      li.style.justifyContent = "space-between";
+      li.style.alignItems = "center";
+      li.style.gap = "1rem";
+      
+      const textDiv = document.createElement("div");
+      textDiv.style.flex = "1";
+      textDiv.innerHTML = `
         <div class="recommendation-action">${rec.action}</div>
         <div class="recommendation-saving">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -634,162 +598,38 @@ function renderCalculationResult(result) {
           Est. Saving: <strong>${rec.savings.toLocaleString()} kg CO2e / yr</strong>
         </div>
       `;
+      
+      const actionBtn = document.createElement("button");
+      actionBtn.className = "btn";
+      actionBtn.style.padding = "6px 12px";
+      actionBtn.style.fontSize = "0.75rem";
+      actionBtn.style.whiteSpace = "nowrap";
+      actionBtn.style.boxShadow = "none";
+      if (isCommitted) {
+        actionBtn.textContent = "Committed ✓";
+        actionBtn.className = "btn secondary";
+        actionBtn.disabled = true;
+      } else {
+        actionBtn.textContent = "+ Commit";
+        actionBtn.addEventListener("click", () => {
+          addCommitment(rec);
+        });
+      }
+      
+      li.appendChild(textDiv);
+      li.appendChild(actionBtn);
       recommendationsList.appendChild(li);
     });
   }
 
+  // Update commitments UI list
+  renderCommitments();
+
   // Update current user score in leaderboard
-  updateUserLeaderboardScore(totalTonnes);
+  debouncedUpdateUserLeaderboardScore(totalTonnes);
 }
 
-// Draw the Passport Card on a high-DPI canvas and trigger PNG download
-function downloadEcoCardImage() {
-  const holderName = cardHolderNameInput.value.trim() || "Eco Champion";
-  const result = runCalculation(userInputs);
-  const scoreText = `${(result.total / 1000).toFixed(2)} tonnes`;
-  
-  // Determine status metadata using the shared helper function
-  const { statusText, statusEmoji } = getStatusData(result.total);
-  const statusLabel = statusText;
-
-  // High resolution canvas matching card graphics at 2x scale (760x440)
-  const canvas = document.createElement("canvas");
-  canvas.width = 760;
-  canvas.height = 440;
-  const ctx = canvas.getContext("2d");
-
-  // Clip path for transparent rounded corners (matches border-radius: 16px at 2x scale)
-  ctx.beginPath();
-  if (ctx.roundRect) {
-    ctx.roundRect(0, 0, 760, 440, 32);
-  } else {
-    ctx.rect(0, 0, 760, 440);
-  }
-  ctx.clip();
-
-  // 1. Background Gradient (linear-gradient(135deg, #0c2016 0%, #030a07 100%))
-  const bgGrad = ctx.createLinearGradient(0, 0, 760, 440);
-  bgGrad.addColorStop(0, "#0c2016");
-  bgGrad.addColorStop(1, "#030a07");
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, 760, 440);
-
-  // 2. Glowing Overlay (matches .ecocard-glow radial-gradient)
-  const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 760);
-  glowGrad.addColorStop(0, "rgba(16, 185, 129, 0.05)");
-  glowGrad.addColorStop(1, "transparent");
-  ctx.fillStyle = glowGrad;
-  ctx.fillRect(0, 0, 760, 440);
-
-  // 3. Card Outer Border - ALWAYS green
-  ctx.strokeStyle = "rgba(16, 185, 129, 0.25)";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(0, 0, 760, 440);
-
-  // 4. Header: 🌱 ECODIAL & CARBON PASSPORT
-  ctx.fillStyle = "#10b981";
-  ctx.font = "bold 26px 'Outfit', Arial, sans-serif";
-  ctx.shadowColor = "rgba(16, 185, 129, 0.4)";
-  ctx.shadowBlur = 10;
-  ctx.fillText("🌱 ECODIAL", 40, 70);
-  ctx.shadowBlur = 0; // Reset shadow
-
-  ctx.fillStyle = "#4f7962";
-  ctx.font = "bold 14px 'Outfit', Arial, sans-serif";
-  ctx.textAlign = "right";
-  ctx.fillText("CARBON PASSPORT", 720, 68);
-  ctx.textAlign = "left";
-
-  // Divider Line
-  ctx.strokeStyle = "rgba(16, 185, 129, 0.15)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(40, 90);
-  ctx.lineTo(720, 90);
-  ctx.stroke();
-
-  // 5. Fields & Values
-  // Cardholder Label
-  ctx.fillStyle = "#4b8066";
-  ctx.font = "bold 12px 'Outfit', Arial, sans-serif";
-  ctx.fillText("CARD HOLDER", 40, 140);
-
-  // Cardholder Name (Value)
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 28px 'Outfit', Arial, sans-serif";
-  ctx.fillText(holderName.toUpperCase(), 40, 180);
-
-  // Underline under Name
-  ctx.strokeStyle = "rgba(16, 185, 129, 0.2)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(40, 195);
-  ctx.lineTo(720, 195);
-  ctx.stroke();
-
-  // Annual Footprint Label
-  ctx.fillStyle = "#4b8066";
-  ctx.font = "bold 12px 'Outfit', Arial, sans-serif";
-  ctx.fillText("ANNUAL CO2e", 40, 255);
-
-  // Annual Footprint Value
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 42px 'Outfit', Arial, sans-serif";
-  ctx.fillText(scoreText.toUpperCase(), 40, 310);
-
-  // Status Label
-  ctx.fillStyle = "#4b8066";
-  ctx.font = "bold 12px 'Outfit', Arial, sans-serif";
-  ctx.fillText("STATUS", 480, 255);
-
-  // Status Pill Badge Background - ALWAYS green
-  ctx.fillStyle = "rgba(16, 185, 129, 0.1)";
-  const tagWidth = 240;
-  const tagHeight = 42;
-  ctx.beginPath();
-  if (ctx.roundRect) {
-    ctx.roundRect(480, 272, tagWidth, tagHeight, 12);
-  } else {
-    ctx.rect(480, 272, tagWidth, tagHeight);
-  }
-  ctx.fill();
-  
-  // Status Pill Badge Border - ALWAYS green
-  ctx.strokeStyle = "rgba(16, 185, 129, 0.2)";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Status Pill Badge Text & Emoticon - ALWAYS green
-  ctx.fillStyle = "#10b981";
-  ctx.font = "bold 16px 'Outfit', Arial, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(`${statusEmoji} ${statusLabel.toUpperCase()}`, 480 + tagWidth / 2, 298);
-  ctx.textAlign = "left";
-
-  // 6. Footer Divider Line
-  ctx.strokeStyle = "rgba(16, 185, 129, 0.1)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(40, 355);
-  ctx.lineTo(720, 355);
-  ctx.stroke();
-
-  // Footer left/right text
-  ctx.fillStyle = "#4b8066";
-  ctx.font = "bold 12px 'Outfit', Arial, sans-serif";
-  ctx.fillText("Track & Reduce Carbon", 40, 385);
-
-  ctx.textAlign = "right";
-  ctx.fillText("2026 ISSUE", 720, 385);
-
-  // Trigger browser download
-  const link = document.createElement("a");
-  link.download = `ecodial-passport-${holderName.toLowerCase().replace(/\s+/g, '-')}.png`;
-  link.href = canvas.toDataURL("image/png");
-  playClickSound();
-  link.click();
-}
-
+// The downloadEcoCardImage function is defined in passport.js
 downloadCardBtn.addEventListener("click", downloadEcoCardImage);
 
 // Synchronize Passport Card input changes in real time
@@ -818,10 +658,14 @@ function cycleCategoricalValue(paramId) {
 function initNavigation() {
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      tabBtns.forEach((b) => b.classList.remove("active"));
+      tabBtns.forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
       tabPanes.forEach((p) => p.classList.remove("active"));
       
       btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
       const targetCategory = btn.getAttribute("data-category");
       document.getElementById(`tab-${targetCategory}`).classList.add("active");
       
@@ -838,7 +682,7 @@ function initNavigation() {
   });
   
   paramCards.forEach((card) => {
-    card.addEventListener("click", () => {
+    const activateCard = () => {
       const clickedParamId = card.getAttribute("data-id");
       const spec = PARAM_SPECS[clickedParamId];
       
@@ -853,6 +697,14 @@ function initNavigation() {
         playClickSound();
       }
       updateDialVisuals();
+    };
+    card.addEventListener("click", activateCard);
+    // Keyboard activation for accessibility (Enter and Space)
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activateCard();
+      }
     });
   });
 }
@@ -967,10 +819,187 @@ function renderHistoryTable(history) {
     
     historyTableBody.appendChild(tr);
   });
+  
+  renderHistoryTrendChart(history);
+}
+
+// The renderHistoryTrendChart function is defined in chart.js
+
+// ==========================================
+// 8. Commitments Tracker & Category Insights Functions
+// ==========================================
+
+function loadPersonalGoal() {
+  try {
+    const raw = localStorage.getItem("ecodial_personal_goal");
+    if (raw) {
+      personalGoal = parseFloat(raw);
+    }
+  } catch (e) {
+    console.error("Failed to load personal goal: ", e);
+  }
+  if (personalGoalInput) {
+    personalGoalInput.value = personalGoal.toFixed(1);
+  }
+}
+
+function savePersonalGoal(val) {
+  try {
+    localStorage.setItem("ecodial_personal_goal", val.toString());
+  } catch (e) {
+    console.error("Failed to save personal goal: ", e);
+  }
+}
+
+function loadCommitments() {
+  try {
+    const raw = localStorage.getItem("ecodial_commitments");
+    activeCommitments = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.error("Failed to load commitments: ", e);
+    activeCommitments = [];
+  }
+  renderCommitments();
+}
+
+function saveCommitments() {
+  try {
+    localStorage.setItem("ecodial_commitments", JSON.stringify(activeCommitments));
+  } catch (e) {
+    console.error("Failed to save commitments: ", e);
+  }
+}
+
+function addCommitment(rec) {
+  if (!activeCommitments.some(c => c.action === rec.action)) {
+    activeCommitments.push(rec);
+    saveCommitments();
+    playClickSound();
+    calculateAndRender();
+  }
+}
+
+function removeCommitment(actionText) {
+  activeCommitments = activeCommitments.filter(c => c.action !== actionText);
+  saveCommitments();
+  playClickSound();
+  calculateAndRender();
+}
+
+function renderCommitments() {
+  const commitmentsList = document.getElementById("commitments-list");
+  const emptyMsg = document.getElementById("commitments-empty-msg");
+  const totalSavedSpan = document.getElementById("commitments-total-saved");
+  const progressBar = document.getElementById("commitments-progress-bar");
+  
+  if (!commitmentsList) return;
+  
+  commitmentsList.innerHTML = "";
+  
+  if (activeCommitments.length === 0) {
+    if (emptyMsg) emptyMsg.classList.remove("hidden");
+    commitmentsList.appendChild(emptyMsg || document.createElement("li"));
+    totalSavedSpan.textContent = "0 kg CO2e / yr";
+    progressBar.style.width = "0%";
+    return;
+  }
+  
+  if (emptyMsg) emptyMsg.classList.add("hidden");
+  
+  let totalSavings = 0;
+  
+  activeCommitments.forEach((c) => {
+    totalSavings += c.savings;
+    
+    const li = document.createElement("li");
+    li.className = "recommendation";
+    li.style.borderLeftColor = "var(--primary)";
+    li.style.display = "flex";
+    li.style.justifyContent = "space-between";
+    li.style.alignItems = "center";
+    li.style.gap = "1rem";
+    
+    const textDiv = document.createElement("div");
+    textDiv.style.flex = "1";
+    textDiv.innerHTML = `
+      <div class="recommendation-action">${c.action}</div>
+      <div class="recommendation-saving">Est. Saving: <strong>${c.savings.toLocaleString()} kg CO2e / yr</strong></div>
+    `;
+    
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "btn-delete-entry";
+    removeBtn.textContent = "Remove";
+    removeBtn.style.color = "var(--accent)";
+    removeBtn.addEventListener("click", () => {
+      removeCommitment(c.action);
+    });
+    
+    li.appendChild(textDiv);
+    li.appendChild(removeBtn);
+    commitmentsList.appendChild(li);
+  });
+  
+  totalSavedSpan.textContent = `${totalSavings.toLocaleString()} kg CO2e / yr`;
+  
+  const currentTotalKg = (parseFloat(scoreValue.textContent) || 0) * 1000;
+  const progressPct = currentTotalKg > 0 ? Math.min(100, (totalSavings / currentTotalKg) * 100) : 0;
+  progressBar.style.width = `${progressPct}%`;
+}
+
+const CATEGORY_DETAILS_MAP = {
+  transport: {
+    title: "🚗 Transport Emissions Details",
+    text: "Transport emissions are computed from your weekly car driving (km/week × 52 × fuel factor) and public transit use, plus annual short/long-haul flight trips (1,100km / 6,500km per trip times aviation factors). Transitioning to electric vehicles and flying less represent the highest-impact actions to lower transport carbon footprints."
+  },
+  home: {
+    title: "🏡 Home Energy Emissions Details",
+    text: "Home energy emissions combine monthly electricity (0.450 kg CO2e/kWh) and natural gas (0.183 kg CO2e/kWh) consumption, scaled annually and divided by your household size. Sharing living spaces distributes the structural carbon burden among members. Switching to heat pumps and solar panels reduces emissions to near-zero."
+  },
+  diet: {
+    title: "🍽️ Diet Emissions Details",
+    text: "Diet emissions are derived from fixed lifecycle carbon footprints associated with different dietary lifestyles: heavy meat (3,300 kg CO2e/yr), vegetarian (1,500 kg CO2e/yr), and vegan (1,050 kg CO2e/yr). Swapping animal products for grains, legumes, and local vegetables dramatically decreases agricultural carbon output."
+  },
+  consumption: {
+    title: "🛍️ Consumption & Waste Details",
+    text: "Consumption emissions scale monthly consumer goods expenditure (0.40 kg CO2e/USD) and weekly landfill waste (0.58 kg CO2e/kg) to annual estimates. Transitioning to a circular economy—buying durable, repairable, or secondhand goods, composting organic waste, and recycling plastic/metals—minimizes lifecycle carbon impact."
+  }
+};
+
+function initBreakdownInteractive() {
+  const categories = ["transport", "home", "diet", "consumption"];
+  const panel = document.getElementById("breakdown-details-panel");
+  const titleEl = document.getElementById("breakdown-details-title");
+  const textEl = document.getElementById("breakdown-details-text");
+  
+  categories.forEach(cat => {
+    const row = document.getElementById(`breakdown-row-${cat}`);
+    if (!row) return;
+    
+    const activate = () => {
+      categories.forEach(c => {
+        const r = document.getElementById(`breakdown-row-${c}`);
+        if (r) r.style.background = "transparent";
+      });
+      
+      row.style.background = "rgba(16, 185, 129, 0.08)";
+      panel.classList.remove("hidden");
+      titleEl.textContent = CATEGORY_DETAILS_MAP[cat].title;
+      textEl.textContent = CATEGORY_DETAILS_MAP[cat].text;
+      playClickSound();
+    };
+    
+    row.addEventListener("click", activate);
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activate();
+      }
+    });
+  });
 }
 
 // ==========================================
-// 8. Community Board & Competition API integrations
+// 9. Community Board & Competition API integrations
 // ==========================================
 
 const COMMUNITY_KEY = "ecodial_community_members";
@@ -1065,6 +1094,15 @@ async function updateUserLeaderboardScore(score) {
   await addOrUpdateLeaderboardMember(updatedSelf);
 }
 
+// Debounced version prevents flooding the server during rapid dial adjustments
+let _leaderboardSyncTimer = null;
+function debouncedUpdateUserLeaderboardScore(score) {
+  clearTimeout(_leaderboardSyncTimer);
+  _leaderboardSyncTimer = setTimeout(() => {
+    updateUserLeaderboardScore(score);
+  }, 500);
+}
+
 async function addCommunityMember() {
   const name = friendNameInput.value.trim();
   const scoreVal = parseFloat(friendScoreInput.value);
@@ -1105,33 +1143,50 @@ async function deleteCommunityMember(id) {
   }
 }
 
+function getLedColor(scoreInTonnes) {
+  if (scoreInTonnes * 1000 <= SUSTAINABLE_TARGET_ANNUAL_KG) return "led-green";
+  if (scoreInTonnes * 1000 <= GLOBAL_AVG_ANNUAL_KG) return "led-yellow";
+  return "led-red";
+}
+
+function getLedLabel(ledColor) {
+  if (ledColor === "led-green") return "Sustainable";
+  if (ledColor === "led-yellow") return "Moderate";
+  return "High";
+}
+
 function renderCommunityBoard() {
   // 1. Sort members ascending by score (lowest footprint = 1st rank!)
   communityMembers.sort((a, b) => a.score - b.score);
   
-  // 2. Render Status LED Lights Grid
+  // 2. Render Status LED Lights Grid (uses textContent for XSS safety)
   statusLightsGrid.innerHTML = "";
   communityMembers.forEach((member) => {
     const card = document.createElement("div");
     card.className = `status-light-card ${member.isSelf ? "active" : ""}`;
     
-    // Choose LED color based on footprint
-    let ledColor = "led-red";
-    if (member.score * 1000 <= SUSTAINABLE_TARGET_ANNUAL_KG) {
-      ledColor = "led-green";
-    } else if (member.score * 1000 <= GLOBAL_AVG_ANNUAL_KG) {
-      ledColor = "led-yellow";
-    }
+    const ledColor = getLedColor(member.score);
     
-    card.innerHTML = `
-      <div class="led-indicator ${ledColor}" title="${member.name} Status"></div>
-      <div class="status-light-name">${member.name}</div>
-      <div class="status-light-score">${member.score.toFixed(1)} t</div>
-    `;
+    const led = document.createElement("div");
+    led.className = `led-indicator ${ledColor}`;
+    led.setAttribute("title", `${member.name} Status`);
+    led.setAttribute("aria-label", `${getLedLabel(ledColor)} status`);
+    
+    const nameDiv = document.createElement("div");
+    nameDiv.className = "status-light-name";
+    nameDiv.textContent = member.name;
+    
+    const scoreDiv = document.createElement("div");
+    scoreDiv.className = "status-light-score";
+    scoreDiv.textContent = `${member.score.toFixed(1)} t`;
+    
+    card.appendChild(led);
+    card.appendChild(nameDiv);
+    card.appendChild(scoreDiv);
     statusLightsGrid.appendChild(card);
   });
   
-  // 3. Render Leaderboard table rows
+  // 3. Render Leaderboard table rows (uses textContent for XSS safety)
   leaderboardTableBody.innerHTML = "";
   communityMembers.forEach((member, index) => {
     const tr = document.createElement("tr");
@@ -1140,39 +1195,59 @@ function renderCommunityBoard() {
       tr.style.borderLeft = "3px solid var(--primary)";
     }
     
-    let ledColor = "led-red";
-    if (member.score * 1000 <= SUSTAINABLE_TARGET_ANNUAL_KG) {
-      ledColor = "led-green";
-    } else if (member.score * 1000 <= GLOBAL_AVG_ANNUAL_KG) {
-      ledColor = "led-yellow";
-    }
-    
+    const ledColor = getLedColor(member.score);
     const isDeletable = !member.isSelf;
-    const actionCell = isDeletable 
-      ? `<button class="btn-del-friend btn-delete-entry" data-id="${member.id}">Remove</button>`
-      : `<span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">Host</span>`;
-      
-    tr.innerHTML = `
-      <td style="font-weight: 700; color: #fff;">${index + 1}</td>
-      <td style="font-weight: 600; color: ${member.isSelf ? "var(--primary)" : "#cbd5e1"};">${member.name}</td>
-      <td style="font-weight: 700; font-family: monospace;">${member.score.toFixed(2)} t</td>
-      <td>
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <div class="led-indicator ${ledColor}" style="margin: 0;"></div>
-          <span style="font-size: 0.7rem; text-transform: uppercase;">
-            ${ledColor === "led-green" ? "Sustainable" : ledColor === "led-yellow" ? "Moderate" : "High"}
-          </span>
-        </div>
-      </td>
-      <td style="text-align: right;">${actionCell}</td>
-    `;
     
+    // Rank cell
+    const tdRank = document.createElement("td");
+    tdRank.style.cssText = "font-weight: 700; color: #fff;";
+    tdRank.textContent = String(index + 1);
+    
+    // Name cell (XSS-safe via textContent)
+    const tdName = document.createElement("td");
+    tdName.style.cssText = `font-weight: 600; color: ${member.isSelf ? "var(--primary)" : "#cbd5e1"};`;
+    tdName.textContent = member.name;
+    
+    // Score cell
+    const tdScore = document.createElement("td");
+    tdScore.style.cssText = "font-weight: 700; font-family: monospace;";
+    tdScore.textContent = `${member.score.toFixed(2)} t`;
+    
+    // Status cell with LED and text label
+    const tdStatus = document.createElement("td");
+    const statusWrapper = document.createElement("div");
+    statusWrapper.style.cssText = "display: flex; align-items: center; gap: 0.5rem;";
+    const ledDiv = document.createElement("div");
+    ledDiv.className = `led-indicator ${ledColor}`;
+    ledDiv.style.margin = "0";
+    const statusSpan = document.createElement("span");
+    statusSpan.style.cssText = "font-size: 0.7rem; text-transform: uppercase;";
+    statusSpan.textContent = getLedLabel(ledColor);
+    statusWrapper.appendChild(ledDiv);
+    statusWrapper.appendChild(statusSpan);
+    tdStatus.appendChild(statusWrapper);
+    
+    // Action cell
+    const tdAction = document.createElement("td");
+    tdAction.style.textAlign = "right";
     if (isDeletable) {
-      tr.querySelector(".btn-del-friend").addEventListener("click", () => {
-        deleteCommunityMember(member.id);
-      });
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "btn-del-friend btn-delete-entry";
+      removeBtn.textContent = "Remove";
+      removeBtn.addEventListener("click", () => deleteCommunityMember(member.id));
+      tdAction.appendChild(removeBtn);
+    } else {
+      const hostSpan = document.createElement("span");
+      hostSpan.style.cssText = "font-size: 0.7rem; color: var(--primary); font-weight: 700;";
+      hostSpan.textContent = "Host";
+      tdAction.appendChild(hostSpan);
     }
     
+    tr.appendChild(tdRank);
+    tr.appendChild(tdName);
+    tr.appendChild(tdScore);
+    tr.appendChild(tdStatus);
+    tr.appendChild(tdAction);
     leaderboardTableBody.appendChild(tr);
   });
 }
@@ -1214,11 +1289,30 @@ function init() {
     cardHolderNameInput.value = savedCardholder;
   }
   
+  loadPersonalGoal();
+
+  if (personalGoalInput) {
+    personalGoalInput.addEventListener("change", (e) => {
+      let val = parseFloat(e.target.value);
+      if (isNaN(val) || val < 0.1) {
+        val = 0.1;
+      } else if (val > 25.0) {
+        val = 25.0;
+      }
+      personalGoal = val;
+      e.target.value = val.toFixed(1);
+      savePersonalGoal(val);
+      calculateAndRender();
+    });
+  }
+  
   renderTicks();
   initDialDrag();
   initNavigation();
   updateAllCardVisuals();
   updateDialVisuals();
+  loadCommitments();
+  initBreakdownInteractive();
   calculateAndRender();
   loadHistory();
   loadCommunityBoard();
